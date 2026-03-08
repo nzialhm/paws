@@ -1,0 +1,6 @@
+{
+    "python.analysis.extraPaths": [
+        "./spectrumdb"
+    ],
+    "python.pythonPath": ".venv27\\Scripts\\python.exe"
+}
