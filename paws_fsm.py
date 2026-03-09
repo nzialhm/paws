@@ -15,26 +15,24 @@ class PawsFSM(object):
             # -----------------
             if self.state == "INIT":
                 print("STATE: INIT")
-                resp = self.device.db.init_req(self.device.config)
-                self.device.rulesets = resp
-                print(resp)
+                init_resp = self.device.db.init_req(self.device.config)
+                print(init_resp)
                 self.state = "REGISTER"
             # -----------------
             # REGISTER
             # -----------------
             elif self.state == "REGISTER":
                 print("STATE: REGISTER")
-                resp = self.device.db.register_req(self.device.config)
-                self.device.device_id = resp.device_id
+                register_resp = self.device.db.register_req(self.device.config)
+                print(register_resp)
                 self.state = "AVAILABLE"
             # -----------------
             # AVAILABLE
             # -----------------
             elif self.state == "AVAILABLE":
                 print("STATE: AVAILABLE")
-                resp = self.device.db.avail_req(self.device.config)
-                self.device.expire_time = resp.expire_time
-                self.device.apply_channel(resp.profiles)
+                available_resp = self.device.db.avail_req(self.device.config)
+                print(available_resp)
                 self.state = "OPERATE"
             # -----------------
             # OPERATE
