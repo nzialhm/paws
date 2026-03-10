@@ -1,3 +1,6 @@
+# req_models.py
+# -*- coding: utf-8 -*-
+
 class deviceDesc:
     def __init__(self):
         self.serialNumber="WS20-224-0000004"
