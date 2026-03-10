@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import json
+import re
 import urllib2
 from spectrumdb_response import SpectrumDBResponseParser
+from models import Channel
 
 # 유니코드 딕셔너리를 utf-8 딕셔너리로 변환하는 함수
 def byteify(input):
@@ -15,6 +17,18 @@ def byteify(input):
         return input.encode('utf-8')
     else:
         return input
+
+def fix_invalid_json(resp_data):
+    
+    if not resp_data:
+        return resp_data
+    # [ ,  → [
+    resp_data = re.sub(r'\[\s*,', '[', resp_data)
+    # , ] → ]
+    resp_data = re.sub(r',\s*\]', ']', resp_data)
+    # , } → }
+    resp_data = re.sub(r',\s*\}', '}', resp_data)
+    return resp_data
 
 class SpectrumDB(object):
     def __init__(self, server_url):
@@ -40,7 +54,11 @@ class SpectrumDB(object):
             self.headers
         )
         response = urllib2.urlopen(req)
-        resp_json = byteify(json.loads(response.read()))
+        resp_data = fix_invalid_json(response.read())
+        print(resp_data)
+        if not resp_data:
+            raise Exception("Empty response from Spectrum DB")
+        resp_json = byteify(json.loads(resp_data))
         print(resp_json)
 
         if "result" in resp_json:
@@ -51,7 +69,7 @@ class SpectrumDB(object):
     # INIT
     # -------------------------
 
-    def init_req(self, config):
+    def init_req(self, device):
         payload = {
                 "version": "1.0",
                 "type": "INIT_REQ",
@@ -81,7 +99,7 @@ class SpectrumDB(object):
     # -------------------------
     # REGISTER
     # -------------------------
-    def register_req(self, config):
+    def register_req(self, device):
         payload = {
             "version": "1.0",
             "type": "REGISTRATION_REQ",
@@ -133,7 +151,7 @@ class SpectrumDB(object):
     # AVAILABLE
     # -------------------------
 
-    def avail_req(self, config):
+    def avail_req(self, device):
         payload = {
             "version": "1.0",
             "type": "AVAIL_SPECTRUM_REQ",
@@ -195,3 +213,66 @@ class SpectrumDB(object):
             payload
         )
         return SpectrumDBResponseParser.parse_available(resp)
+
+    # -------------------------
+    # USE NOTIFY
+    # -------------------------
+
+    def notify_req(self, device):
+        ch = device.available_resp.profiles[0]
+        print(ch)
+        payload = {
+                "version": "1.0",
+                "type": "SPECTRUM_USE_NOTIFY",
+                "deviceDesc": {
+                    "serialNumber": "WS20-224-0000004",
+                    "ksDeviceEmissionPower": 20,
+                    "ksCertId": "R-R-nZc-NZC-WS20",
+                    "ksDeviceType": "Portable Master",
+                    "modelId": "NZC-WS20"
+                },
+                "location": {
+                    "point": {
+                        "center": {
+                            "latitude": 37.586,
+                            "longitude": 126.8172
+                        }
+                    }
+                },
+                "antennaCharacteristics": {
+                    "heightType": "AGL",
+                    "height": 11.0
+                },
+                "masterDeviceDesc": {
+                    "serialNumber": "WS20-224-0000004",
+                    "ksDeviceEmissionPower": 20,
+                    "ksCertId": "R-R-nZc-NZC-WS20",
+                    "ksDeviceType": "Portable Master",
+                    "modelId": "NZC-WS20"
+                },
+                "masterDeviceLocation": {
+                    "point": {
+                        "center": {
+                            "latitude": 37.586,
+                            "longitude": 126.8172
+                        }
+                    }
+                },
+                "spectra": {
+                    "bandwidth": ch.bandwidth,
+                    "frequencyRanges": [
+                        {
+                            "startHz": ch.start_hz,
+                            "stopHz": ch.stop_hz,
+                            "channelId": ch.channel_id
+                        }
+                    ]
+                }
+
+            }
+        resp = self._post(
+            "spectrum.paws.notifySpectrumUse",
+            payload
+        )
+        print(resp)
+        return SpectrumDBResponseParser.parse_notify(resp, ch)

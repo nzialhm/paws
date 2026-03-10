@@ -10,6 +10,8 @@ class InitResponse:
         # 1. 'result' 키 추출 (없으면 빈 딕셔너리)
         # 전체 응답 딕셔너리일 수도 있고, result 부분만 넘어올 수도 있으므로 체크
         print(result)
+        self.type = result.get('type', '')
+        print(self.type)
         
         # 2. 'rulesetInfo' 추출
         ruleset_info = result.get('rulesetInfo', {})
@@ -26,11 +28,9 @@ class InitResponse:
         # 추가 정보가 필요하다면 여기서 더 추출할 수 있습니다.
         self.version = result.get('version', '')
         print(self.version)
-        self.type = result.get('type', '')
-        print(self.type)
-
+        
     def __repr__(self):
-        return "<InitResponse: device_id=%s, type=%s>" % (self.device_id, self.type)
+        return "<InitResponse: type=%s, device_id=%s>" % (self.type, self.device_id)
 class RegisterResponse:
     def __init__(self, result):
         """
@@ -39,6 +39,8 @@ class RegisterResponse:
         """
         # 1. 'result' 데이터 추출
         print(result)
+        self.type = result.get('type', '')
+        print(self.type)
         
         # 2. 서버 응답의 오타('ruelsetInfo')와 정상('rulesetInfo') 모두 대응
         # get('A')가 None이면 get('B')를 시도합니다.
@@ -50,21 +52,22 @@ class RegisterResponse:
         self.device_id = ruleset_info.get('rulesetId', 'Unknown_ID')
 
     def __repr__(self):
-        return "<RegisterResponse: device_id=%s>" % self.device_id
+        return "<RegisterResponse: type=%s, device_id=%s>" % (self.type, self.device_id)
 
 class Channel(object):
     """개별 채널 정보를 담는 보조 객체"""
-    def __init__(self, frequency, bandwidth, max_eirp, channel_id, startTime, stopTime):
-        self.frequency = frequency
+    def __init__(self, start_hz, stop_hz, bandwidth, ksDeviceEmissionPower, channel_id, startTime, stopTime):
+        self.start_hz = start_hz
+        self.stop_hz = stop_hz
         self.bandwidth = bandwidth
-        self.max_eirp = max_eirp
+        self.ksDeviceEmissionPower = ksDeviceEmissionPower
         self.channel_id = channel_id
         self.startTime = startTime
         self.stopTime = stopTime
 
     def __repr__(self):
-        return "<Channel ID: %s, Freq: %sMHz, BW: %sMHz>" % (
-            self.channel_id, self.frequency, self.bandwidth)
+        return "<Channel ID: %s, start_hz: %sMHz, stop_hz: %sMHz, BW: %sMHz>" % (
+            self.channel_id, self.start_hz, self.stop_hz, self.bandwidth)
 
 class AvailableSpectrumResponse(object):
     def __init__(self, result):
@@ -75,11 +78,13 @@ class AvailableSpectrumResponse(object):
         
         # 1. 'result' 데이터 추출
         print(result)
+        self.type = result.get('type', '')
+        print(self.type)
         
         # 2. 공통 EIRP 정보 추출 (deviceDesc 내 ksDeviceEmissionPower)
         # 서버 응답에 'serealNumber' 오타가 있어도 안전하게 처리하도록 구성
         device_desc = result.get('deviceDesc', {})
-        max_eirp = device_desc.get('ksDeviceEmissionPower', 0.0)
+        ksDeviceEmissionPower = device_desc.get('ksDeviceEmissionPower', 0.0)
         
         # 3. 중첩된 스펙트럼 데이터 순회
         # spectrumSchedules -> spectra -> frequencyRanges 순서로 접근
@@ -101,13 +106,15 @@ class AvailableSpectrumResponse(object):
                 ranges = spectrum.get('frequencyRanges', [])
                 for freq_range in ranges:
                     start_hz = freq_range.get('startHz')
+                    stop_hz = freq_range.get('stopHz')
                     channel_id = freq_range.get('channelId')
                     
                     # 4. 개별 채널 객체 생성 및 메인 리스트에 추가
                     new_channel = Channel(
-                        frequency=start_hz,
+                        start_hz=start_hz,
+                        stop_hz=stop_hz,
                         bandwidth=bw,
-                        max_eirp=max_eirp,
+                        ksDeviceEmissionPower=ksDeviceEmissionPower,
                         channel_id=channel_id,
                         startTime=startTime,
                         stopTime=stopTime
@@ -115,5 +122,17 @@ class AvailableSpectrumResponse(object):
                     self.profiles.append(new_channel)
 
     def __repr__(self):
-        return "<SpectrumProfile: Total %d channels found>" % len(self.profiles)
+        return "<SpectrumProfile: type=%s, Total %d channels found>" % (self.type, len(self.profiles))
 
+class NotifyResponse:
+    def __init__(self, result, channel):
+
+        self.select_channel=channel
+        # 1. 'result' 데이터 추출
+        print(result)
+        self.type = result.get('type', '')
+        print(self.type)
+        
+       
+    def __repr__(self):
+        return "<UseNotify: type=%s>" % (self.type)

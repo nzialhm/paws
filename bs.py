@@ -8,14 +8,5 @@ class BS(BaseDevice):
         BaseDevice.__init__(self, config)
         self.db = db
 
-    def connect_db(self):
-        init = self.db.init_req(self.config)
-        reg  = self.db.register_req(self.config)
-        avail = self.db.avail_req(self.config)
+    def apply_channel(self):
         return avail
-
-    def run(self):
-        resp = self.connect_db()
-        channel = resp["channel"]
-        self.apply_channel(channel)
-        return channel
