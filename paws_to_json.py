@@ -1,3 +1,6 @@
+# paws_to_json.py
+# -*- coding: utf-8 -*-
+
 import json
 
 # 1. 속성을 자유롭게 추가하기 위한 기본 클래스

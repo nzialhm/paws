@@ -6,6 +6,7 @@ import re
 import urllib2
 from spectrumdb_response import SpectrumDBResponseParser
 from models import Channel
+from .req_models import *
 
 # 유니코드 딕셔너리를 utf-8 딕셔너리로 변환하는 함수
 def byteify(input):
@@ -70,25 +71,15 @@ class SpectrumDB(object):
     # -------------------------
 
     def init_req(self, device):
+        _deviceDesc = deviceDesc()
+        _location = location()
         payload = {
                 "version": "1.0",
                 "type": "INIT_REQ",
-                "deviceDesc": {
-                    "serialNumber": "WS20-224-0000004",
-                    "ksDeviceEmissionPower": 20,
-                    "ksCertId": "R-R-nZc-NZC-WS20",
-                    "ksDeviceType": "Portable Master",
-                    "modelId": "NZC-WS20"
-                },
-                "location": {
-                    "point": {
-                        "center": {
-                            "latitude": 37.586,
-                            "longitude": 126.8172
-                        }
-                    }
-                }
+                "deviceDesc": _deviceDesc.to_dict(),
+                "location": _location.to_dict()
             }
+        print(payload)
         resp = self._post(
             "spectrum.paws.init",
             payload
@@ -100,46 +91,17 @@ class SpectrumDB(object):
     # REGISTER
     # -------------------------
     def register_req(self, device):
+        _deviceDesc = deviceDesc()
+        _location = location()
+        _deviceOwner = deviceOwner()
+        _antennaCharacteristics = antennaCharacteristics()
         payload = {
             "version": "1.0",
             "type": "REGISTRATION_REQ",
-            "deviceDesc": {
-                "serialNumber": "WS20-224-0000004",
-                "ksDeviceEmissionPower": 20,
-                "ksCertId": "R-R-nZc-NZC-WS20",
-                "ksDeviceType": "Portable Master",
-                "modelId": "NZC-WS20"
-            },
-            "location": {
-                "point": {
-                    "center": {
-                        "latitude": 37.586,
-                        "longitude": 126.8172
-                    }
-                }
-            },
-            "deviceOwner": {
-                "operator": {
-                    "tel": "+82 32 650 5766",
-                    "adr": {
-                        "country": "KR",
-                        "region": "South Korea",
-                        "code": "21315",
-                        "street": "bupyungdearo 293",
-                        "locality": "bupyunggu"
-                    },
-                    "email": "welcome@nzia.kr",
-                    "fn": "NZIA"
-                },
-                "owner": {
-                    "kind": "co",
-                    "fn": "NZIA"
-                }
-            },
-            "antennaCharacteristics": {
-                "heightType": "AGL",
-                "height": 11.0
-            }
+            "deviceDesc": _deviceDesc.to_dict(),
+            "location": _location.to_dict(),
+            "deviceOwner": _deviceOwner.to_dict(),
+            "antennaCharacteristics": _antennaCharacteristics.to_dict()
         }
         resp = self._post(
             "spectrum.paws.register",
@@ -152,61 +114,21 @@ class SpectrumDB(object):
     # -------------------------
 
     def avail_req(self, device):
+        _deviceDesc = deviceDesc()
+        _location = location()
+        _masterDeviceDesc = masterDeviceDesc()
+        _masterDeviceLocation = masterDeviceLocation()
+        _deviceOwner = deviceOwner()
+        _antennaCharacteristics = antennaCharacteristics()
         payload = {
             "version": "1.0",
             "type": "AVAIL_SPECTRUM_REQ",
-            "deviceDesc": {
-                "serialNumber": "WS20-224-0000004",
-                "ksDeviceEmissionPower": 20,
-                "ksCertId": "R-R-nZc-NZC-WS20",
-                "ksDeviceType": "Portable Master",
-                "modelId": "NZC-WS20"
-            },
-            "location": {
-                "point": {
-                    "center": {
-                        "latitude": 37.586,
-                        "longitude": 126.8172
-                    }
-                }
-            },
-            "masterDeviceDesc": {
-                "serialNumber": "WS20-224-0000004",
-                "ksDeviceEmissionPower": 20,
-                "ksCertId": "R-R-nZc-NZC-WS20",
-                "ksDeviceType": "Portable Master",
-                "modelId": "NZC-WS20"
-            },
-            "masterDeviceLocation": {
-                "point": {
-                    "center": {
-                        "latitude": 37.586,
-                        "longitude": 126.8172
-                    }
-                }
-            },
-            "deviceOwner": {
-                "operator": {
-                    "tel": "+82 32 650 5766",
-                    "adr": {
-                        "country": "KR",
-                        "region": "South Korea",
-                        "code": "21315",
-                        "street": "bupyungdearo 293",
-                        "locality": "bupyunggu"
-                    },
-                    "email": "welcome@nzia.kr",
-                    "fn": "NZIA"
-                },
-                "owner": {
-                    "kind": "co",
-                    "fn": "NZIA"
-                }
-            },
-            "antennaCharacteristics": {
-                "heightType": "AGL",
-                "height": 11.0
-            }
+            "deviceDesc": _deviceDesc.to_dict(),
+            "location": _location.to_dict(),
+            "masterDeviceDesc": _masterDeviceDesc.to_dict(),
+            "masterDeviceLocation": _masterDeviceLocation.to_dict(),
+            "deviceOwner": _deviceOwner.to_dict(),
+            "antennaCharacteristics": _antennaCharacteristics.to_dict()
         }
         resp = self._post(
             "spectrum.paws.getSpectrum",
@@ -221,54 +143,26 @@ class SpectrumDB(object):
     def notify_req(self, device):
         ch = device.available_resp.profiles[0]
         print(ch)
+        _deviceDesc = deviceDesc()
+        _location = location()
+        _masterDeviceDesc = masterDeviceDesc()
+        _masterDeviceLocation = masterDeviceLocation()
+        _deviceOwner = deviceOwner()
+        _antennaCharacteristics = antennaCharacteristics()
+        _spectra = spectra()
+        _spectra.bandwidth = ch.bandwidth
+        _spectra.frequencyRanges[0]["startHz"] = ch.start_hz
+        _spectra.frequencyRanges[0]["stopHz"] = ch.stop_hz
+        _spectra.frequencyRanges[0]["channelId"] = ch.channel_id
         payload = {
                 "version": "1.0",
                 "type": "SPECTRUM_USE_NOTIFY",
-                "deviceDesc": {
-                    "serialNumber": "WS20-224-0000004",
-                    "ksDeviceEmissionPower": 20,
-                    "ksCertId": "R-R-nZc-NZC-WS20",
-                    "ksDeviceType": "Portable Master",
-                    "modelId": "NZC-WS20"
-                },
-                "location": {
-                    "point": {
-                        "center": {
-                            "latitude": 37.586,
-                            "longitude": 126.8172
-                        }
-                    }
-                },
-                "antennaCharacteristics": {
-                    "heightType": "AGL",
-                    "height": 11.0
-                },
-                "masterDeviceDesc": {
-                    "serialNumber": "WS20-224-0000004",
-                    "ksDeviceEmissionPower": 20,
-                    "ksCertId": "R-R-nZc-NZC-WS20",
-                    "ksDeviceType": "Portable Master",
-                    "modelId": "NZC-WS20"
-                },
-                "masterDeviceLocation": {
-                    "point": {
-                        "center": {
-                            "latitude": 37.586,
-                            "longitude": 126.8172
-                        }
-                    }
-                },
-                "spectra": {
-                    "bandwidth": ch.bandwidth,
-                    "frequencyRanges": [
-                        {
-                            "startHz": ch.start_hz,
-                            "stopHz": ch.stop_hz,
-                            "channelId": ch.channel_id
-                        }
-                    ]
-                }
-
+                "deviceDesc": _deviceDesc.to_dict(),
+                "location": _location.to_dict(),
+                "antennaCharacteristics": _antennaCharacteristics.to_dict(),
+                "masterDeviceDesc": _masterDeviceDesc.to_dict(),
+                "masterDeviceLocation": _masterDeviceLocation.to_dict(),
+                "spectra": _spectra.to_dict()
             }
         resp = self._post(
             "spectrum.paws.notifySpectrumUse",

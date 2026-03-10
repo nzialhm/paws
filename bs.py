@@ -9,4 +9,4 @@ class BS(BaseDevice):
         self.db = db
 
     def apply_channel(self):
-        return avail
+        pass

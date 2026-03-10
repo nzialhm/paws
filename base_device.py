@@ -6,6 +6,5 @@ class BaseDevice(object):
         self.config = config
         self.channel = None
 
-    def apply_channel(self, channel):
-        self.channel = channel
-        print("Apply channel:", channel)
+    def apply_channel(self):
+        print("Apply channel:", self.channel)

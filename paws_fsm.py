@@ -53,6 +53,7 @@ class PawsFSM(object):
                 self.device.notify_resp = self.device.db.notify_req(self.device)
                 print(self.device.notify_resp)
                 self.device.expire_time=self.device.notify_resp.select_channel.stopTime
+                self.channel=self.device.notify_resp.select_channel.channel_id
                 self.state = "OPERATE"
             # -----------------
             # OPERATE
