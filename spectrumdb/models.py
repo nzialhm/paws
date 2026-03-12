@@ -165,6 +165,20 @@ class AvailableSpectrumResponse(object):
         uci.set(file, 'AvailableSpectrumResponse', 'modelId', self.modelId)
         uci.set(file, 'AvailableSpectrumResponse', 'serealNumber', self.serealNumber)
         uci.set(file, 'AvailableSpectrumResponse', 'ksDeviceEmissionPower', self.ksDeviceEmissionPower)
+        channel_ids = []
+        start_hzs = []
+        stop_hzs = []
+
+        for ch in self.profiles:
+            channel_ids.append(str(ch.channel_id))
+            start_hzs.append(str(ch.start_hz))
+            stop_hzs.append(str(ch.stop_hz))
+
+        uci.set(file, 'NotifyResponse', 'channelId', ",".join(channel_ids))
+        uci.set(file, 'NotifyResponse', 'startHz', ",".join(start_hzs))
+        uci.set(file, 'NotifyResponse', 'stopHz', ",".join(stop_hzs))
+
+
         print(self.type)
 
 
