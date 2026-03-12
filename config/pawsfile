@@ -1,0 +1,4 @@
+config pawsfile 'name'
+    option reqfile 'paws_req_kr'
+    option respfile 'paws_resp_kr'
+    

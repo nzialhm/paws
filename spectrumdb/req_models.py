@@ -8,6 +8,15 @@ class deviceDesc:
         self.ksCertId="R-R-nZc-NZC-WS20"
         self.ksDeviceType="Portable Master"
         self.modelId="NZC-WS20"
+
+    def uci_load(self, uci, file):
+        self.serialNumber=uci.get(file, 'deviceDesc', 'serialNumber')
+        self.ksDeviceEmissionPower=uci.get(file, 'deviceDesc', 'ksDeviceEmissionPower')
+        self.ksCertId=uci.get(file, 'deviceDesc', 'ksCertId')
+        self.ksDeviceType=uci.get(file, 'deviceDesc', 'ksDeviceType')
+        self.modelId=uci.get(file, 'deviceDesc', 'modelId')
+        print(self.modelId)
+
     def to_dict(self):
         return {
             "serialNumber": self.serialNumber,
@@ -21,6 +30,12 @@ class location:
     def __init__(self):
         self.latitude = 37.586
         self.longitude = 126.8172
+    
+    def uci_load(self, uci, file):
+        self.latitude = uci.get(file, 'location', 'latitude')
+        self.longitude = uci.get(file, 'location', 'longitude')
+        print(self.longitude)
+
     def to_dict(self):
         return {
                 "point": {
@@ -46,6 +61,23 @@ class deviceOwner:
 
         self.owner_kind = "co"
         self.owner_fn = "NZIA"
+    
+    def uci_load(self, uci, file):
+        self.operator_tel = uci.get(file, 'deviceOwner', 'operator_tel')
+
+        self.adr_country = uci.get(file, 'deviceOwner', 'adr_country')
+        self.adr_region = uci.get(file, 'deviceOwner', 'adr_region')
+        self.adr_code = uci.get(file, 'deviceOwner', 'adr_code')
+        self.adr_street = uci.get(file, 'deviceOwner', 'adr_street')
+        self.adr_locality = uci.get(file, 'deviceOwner', 'adr_locality')
+
+        self.operator_email = uci.get(file, 'deviceOwner', 'operator_email')
+        self.operator_fn = uci.get(file, 'deviceOwner', 'operator_fn')
+
+        self.owner_kind = uci.get(file, 'deviceOwner', 'owner_kind')
+        self.owner_fn = uci.get(file, 'deviceOwner', 'owner_fn')
+        print(self.owner_fn)
+
     def to_dict(self):
         return {
                 "operator": {
@@ -70,6 +102,12 @@ class antennaCharacteristics:
     def __init__(self):
         self.heightType="AGL"
         self.height=11.0
+    
+    def uci_load(self, uci, file):
+        self.heightType=uci.get(file, 'antennaCharacteristics', 'heightType')
+        self.height=uci.get(file, 'antennaCharacteristics', 'height')
+        print(self.height)
+
     def to_dict(self):
         return  {
                 "heightType": self.heightType,
@@ -83,6 +121,16 @@ class masterDeviceDesc:
         self.ksCertId="R-R-nZc-NZC-WS20"
         self.ksDeviceType="Portable Master"
         self.modelId="NZC-WS20"
+        
+    
+    def uci_load(self, uci, file):
+        self.serialNumber=uci.get(file, 'masterDeviceDesc', 'serialNumber')
+        self.ksDeviceEmissionPower=uci.get(file, 'masterDeviceDesc', 'ksDeviceEmissionPower')
+        self.ksCertId=uci.get(file, 'masterDeviceDesc', 'ksCertId')
+        self.ksDeviceType=uci.get(file, 'masterDeviceDesc', 'ksDeviceType')
+        self.modelId=uci.get(file, 'masterDeviceDesc', 'modelId')
+        print(self.modelId)
+
     def to_dict(self):
         return  {
                 "serialNumber": self.serialNumber,
@@ -96,6 +144,12 @@ class masterDeviceLocation:
     def __init__(self):
         self.latitude = 37.586
         self.longitude = 126.8172
+    
+    def uci_load(self, uci, file):
+        self.latitude = uci.get(file, 'masterDeviceLocation', 'latitude')
+        self.longitude = uci.get(file, 'masterDeviceLocation', 'longitude')
+        print(self.longitude)
+
     def to_dict(self):
         return {
                 "point": {
@@ -115,6 +169,20 @@ class spectra:
         frequencyRanges_0["stopHz"] = 542
         frequencyRanges_0["channelId"] = 25
         self.frequencyRanges.append(frequencyRanges_0)
+
+    def uci_load(self, uci, file):
+        self.bandwidth = uci.get(file, 'spectra', 'bandwidth')
+        self.frequencyRanges[0]["startHz"] = uci.get(file, 'spectra', 'startHz')
+        self.frequencyRanges[0]["stopHz"] = uci.get(file, 'spectra', 'stopHz')
+        self.frequencyRanges[0]["channelId"] = uci.get(file, 'spectra', 'channelId')
+        print(self.bandwidth)
+
+    def set_channelinfo(self, channel):
+        self.bandwidth = channel.bandwidth
+        self.frequencyRanges[0]["startHz"] = channel.start_hz
+        self.frequencyRanges[0]["stopHz"] = channel.stop_hz
+        self.frequencyRanges[0]["channelId"] = channel.channel_id
+
     def to_dict(self):
         return  {
                 "bandwidth": self.bandwidth,

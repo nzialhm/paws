@@ -1,0 +1,43 @@
+config pawsreqkr 'deviceDesc'
+    option serialNumber 'WS20-224-0000004'
+    option ksDeviceEmissionPower 20
+    option ksCertId 'R-R-nZc-NZC-WS20'
+    option ksDeviceType 'Portable Master'
+    option modelId 'NZC-WS20'
+
+config pawsreqkr 'location'
+    option latitude 37.586
+    option longitude 126.8172
+
+config pawsreqkr 'deviceOwner'
+    option operator_tel '+82 32 650 5766'
+    option adr_country 'KR'
+    option adr_region 'South Korea'
+    option adr_code '21315'
+    option adr_street 'bupyungdearo 293'
+    option adr_locality 'bupyunggu'
+    option operator_email 'welcome@nzia.kr'
+    option operator_fn 'NZIA'
+    option owner_kind 'co'
+    option owner_fn 'NZIA'
+
+config pawsreqkr 'antennaCharacteristics'
+    option heightType 'AGL'
+    option height 11.0
+
+config pawsreqkr 'masterDeviceDesc'
+    option serialNumber 'WS20-224-0000004'
+    option ksDeviceEmissionPower 20
+    option ksCertId 'R-R-nZc-NZC-WS20'
+    option ksDeviceType 'Portable Master'
+    option modelId 'NZC-WS20'
+
+config pawsreqkr 'masterDeviceLocation'
+    option latitude 37.586
+    option longitude 126.8172
+
+config pawsreqkr 'spectra'
+    option bandwidth 6
+    option startHz 536
+    option stopHz 542
+    option channelId 25

@@ -71,13 +71,11 @@ class SpectrumDB(object):
     # -------------------------
 
     def init_req(self, device):
-        _deviceDesc = deviceDesc()
-        _location = location()
         payload = {
                 "version": "1.0",
                 "type": "INIT_REQ",
-                "deviceDesc": _deviceDesc.to_dict(),
-                "location": _location.to_dict()
+                "deviceDesc": device._deviceDesc.to_dict(),
+                "location": device._location.to_dict()
             }
         print(payload)
         resp = self._post(
@@ -91,17 +89,13 @@ class SpectrumDB(object):
     # REGISTER
     # -------------------------
     def register_req(self, device):
-        _deviceDesc = deviceDesc()
-        _location = location()
-        _deviceOwner = deviceOwner()
-        _antennaCharacteristics = antennaCharacteristics()
         payload = {
             "version": "1.0",
             "type": "REGISTRATION_REQ",
-            "deviceDesc": _deviceDesc.to_dict(),
-            "location": _location.to_dict(),
-            "deviceOwner": _deviceOwner.to_dict(),
-            "antennaCharacteristics": _antennaCharacteristics.to_dict()
+            "deviceDesc": device._deviceDesc.to_dict(),
+            "location": device._location.to_dict(),
+            "deviceOwner": device._deviceOwner.to_dict(),
+            "antennaCharacteristics": device._antennaCharacteristics.to_dict()
         }
         resp = self._post(
             "spectrum.paws.register",
@@ -114,21 +108,15 @@ class SpectrumDB(object):
     # -------------------------
 
     def avail_req(self, device):
-        _deviceDesc = deviceDesc()
-        _location = location()
-        _masterDeviceDesc = masterDeviceDesc()
-        _masterDeviceLocation = masterDeviceLocation()
-        _deviceOwner = deviceOwner()
-        _antennaCharacteristics = antennaCharacteristics()
         payload = {
             "version": "1.0",
             "type": "AVAIL_SPECTRUM_REQ",
-            "deviceDesc": _deviceDesc.to_dict(),
-            "location": _location.to_dict(),
-            "masterDeviceDesc": _masterDeviceDesc.to_dict(),
-            "masterDeviceLocation": _masterDeviceLocation.to_dict(),
-            "deviceOwner": _deviceOwner.to_dict(),
-            "antennaCharacteristics": _antennaCharacteristics.to_dict()
+            "deviceDesc": device._deviceDesc.to_dict(),
+            "location": device._location.to_dict(),
+            "masterDeviceDesc": device._masterDeviceDesc.to_dict(),
+            "masterDeviceLocation": device._masterDeviceLocation.to_dict(),
+            "deviceOwner": device._deviceOwner.to_dict(),
+            "antennaCharacteristics": device._antennaCharacteristics.to_dict()
         }
         resp = self._post(
             "spectrum.paws.getSpectrum",
@@ -141,32 +129,19 @@ class SpectrumDB(object):
     # -------------------------
 
     def notify_req(self, device):
-        ch = device.available_resp.profiles[0]
-        print(ch)
-        _deviceDesc = deviceDesc()
-        _location = location()
-        _masterDeviceDesc = masterDeviceDesc()
-        _masterDeviceLocation = masterDeviceLocation()
-        _deviceOwner = deviceOwner()
-        _antennaCharacteristics = antennaCharacteristics()
-        _spectra = spectra()
-        _spectra.bandwidth = ch.bandwidth
-        _spectra.frequencyRanges[0]["startHz"] = ch.start_hz
-        _spectra.frequencyRanges[0]["stopHz"] = ch.stop_hz
-        _spectra.frequencyRanges[0]["channelId"] = ch.channel_id
         payload = {
                 "version": "1.0",
                 "type": "SPECTRUM_USE_NOTIFY",
-                "deviceDesc": _deviceDesc.to_dict(),
-                "location": _location.to_dict(),
-                "antennaCharacteristics": _antennaCharacteristics.to_dict(),
-                "masterDeviceDesc": _masterDeviceDesc.to_dict(),
-                "masterDeviceLocation": _masterDeviceLocation.to_dict(),
-                "spectra": _spectra.to_dict()
+                "deviceDesc": device._deviceDesc.to_dict(),
+                "location": device._location.to_dict(),
+                "antennaCharacteristics": device._antennaCharacteristics.to_dict(),
+                "masterDeviceDesc": device._masterDeviceDesc.to_dict(),
+                "masterDeviceLocation": device._masterDeviceLocation.to_dict(),
+                "spectra": device._spectra.to_dict()
             }
         resp = self._post(
             "spectrum.paws.notifySpectrumUse",
             payload
         )
         print(resp)
-        return SpectrumDBResponseParser.parse_notify(resp, ch)
+        return SpectrumDBResponseParser.parse_notify(resp, device.channel)
