@@ -3,6 +3,7 @@
 
 import time
 from datetime import datetime
+from spectrumdb.models import *
 
 class PawsFSM(object):
     def __init__(self, device):
@@ -19,6 +20,14 @@ class PawsFSM(object):
                 self.device.uci_load()
                 self.state = "INIT"
             # -----------------
+            # WAITRETRY
+            # -----------------
+            elif self.state == "WAITRETRY":
+                print("STATE: WAITRETRY")
+                time.sleep(5)
+                self.state = "INIT"
+                
+            # -----------------
             # INIT
             # -----------------
             elif self.state == "INIT":
@@ -29,29 +38,54 @@ class PawsFSM(object):
                 self.device.notify_resp = None
                 self.device.channel = None
                 self.device.expire_time="2026-00-01 01:00:00"
-                self.device.init_resp = self.device.db.init_req(self.device)
-                print(self.device.init_resp)
-                self.state = "REGISTER"
+                try:
+                    self.device.init_resp = self.device.db.init_req(self.device)
+                    if isinstance(self.device.init_resp, InitResponse):
+                        print(self.device.init_resp)
+                        self.state = "REGISTER"
+                    else:
+                        self.state = "WAITRETRY"
+                except Exception as e:
+                    print("INIT ERROR:", e)
+                    self.state = "WAITRETRY"
             # -----------------
             # REGISTER
             # -----------------
             elif self.state == "REGISTER":
                 print("STATE: REGISTER")
                 self.device.register_resp = None
-                self.device.register_resp = self.device.db.register_req(self.device)
-                print(self.device.register_resp)
-                self.state = "AVAILABLE"
+                try:
+                    self.device.register_resp = self.device.db.register_req(self.device)
+                    if isinstance(self.device.register_resp, RegisterResponse):
+                        print(self.device.register_resp)
+                        self.state = "AVAILABLE"
+                    else:
+                        self.state = "WAITRETRY"
+                except Exception as e:
+                    print("REGISTER ERROR:", e)
+                    self.state = "WAITRETRY"
             # -----------------
             # AVAILABLE
             # -----------------
             elif self.state == "AVAILABLE":
                 print("STATE: AVAILABLE")
                 self.device.available_resp = None
-                self.device.available_resp = self.device.db.avail_req(self.device)
-                print(self.device.available_resp)
-                size = len(self.device.available_resp.profiles)
-                print(size)
-                self.state = "USENOTIFY"
+                try:
+                    self.device.available_resp = self.device.db.avail_req(self.device)
+                    if isinstance(self.device.available_resp, AvailableSpectrumResponse):
+                        print(self.device.available_resp)
+                        size = len(self.device.available_resp.profiles)
+                        if size > 0:
+                            print(size)
+                            self.state = "USENOTIFY"
+                        else:
+                            self.state = "WAITRETRY"
+                    else:
+                        self.state = "WAITRETRY"
+                except Exception as e:
+                    print("AVAILABLE ERROR:", e)
+                    self.state = "WAITRETRY"
+                
             # -----------------
             # USENOTIFY
             # -----------------
@@ -59,14 +93,22 @@ class PawsFSM(object):
                 print("STATE: USENOTIFY")
                 self.device.notify_resp = None
                 self.device.expire_time="2026-00-01 01:00:00"
-                self.device.channel = self.device.available_resp.profiles[0]
+                if self.device.available_resp.profiles:
+                    self.device.channel = self.device.available_resp.profiles[0]
                 print(self.device.channel)
                 self.device._spectra.set_channelinfo(self.device.channel)
-                self.device.notify_resp = self.device.db.notify_req(self.device)
-                print(self.device.notify_resp)
-                self.device.expire_time=self.device.notify_resp.select_channel.stopTime
-                self.channel_id=self.device.notify_resp.select_channel.channel_id
-                self.state = "UCIUPDATE"
+                try:
+                    self.device.notify_resp = self.device.db.notify_req(self.device)
+                    if isinstance(self.device.notify_resp, NotifyResponse):
+                        print(self.device.notify_resp)
+                        self.device.expire_time=self.device.notify_resp.select_channel.stopTime
+                        self.channel_id=self.device.notify_resp.select_channel.channel_id
+                        self.state = "UCIUPDATE"
+                    else:
+                        self.state = "WAITRETRY"
+                except Exception as e:
+                    print("USENOTIFY ERROR:", e)
+                    self.state = "WAITRETRY"
             # -----------------
             # UCIUPDATE
             # -----------------
