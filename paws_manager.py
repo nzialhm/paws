@@ -28,9 +28,9 @@ CONFIG = {
 
 def main():
     # windows
-    uci = UCIReader(uci_dir='.\\config')
+    # uci = UCIReader(uci_dir='.\\config')
     # linux openwrt
-    # uci = UCIReader(uci_dir='/ect/config')
+    uci = UCIReader(uci_dir='/etc/config')
     _devicetype = uci.get('pawsfile', 'name', 'devicetype')
     _serverurl = uci.get('pawsfile', 'name', 'serverurl')
     if _devicetype == "bs":

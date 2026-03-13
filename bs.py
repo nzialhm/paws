@@ -26,9 +26,9 @@ class BS(BaseDevice):
         pass
     def uci_load(self):
         # windows
-        uci = UCIReader(uci_dir='.\\config')
+        # uci = UCIReader(uci_dir='.\\config')
         # linux openwrt
-        # uci = UCIReader(uci_dir='/ect/config')
+        uci = UCIReader(uci_dir='/etc/config')
         _reqfile = uci.get('pawsfile', 'name', 'reqfile')
         self._deviceDesc.uci_load(uci, _reqfile)
         self._location.uci_load(uci, _reqfile)
@@ -40,9 +40,9 @@ class BS(BaseDevice):
 
     def uci_update(self):
         # windows
-        uci = UCIReader(uci_dir='.\\config')
+        # uci = UCIReader(uci_dir='.\\config')
         # linux openwrt
-        # uci = UCIReader(uci_dir='/ect/config')
+        uci = UCIReader(uci_dir='/etc/config')
         _respfile = uci.get('pawsfile', 'name', 'respfile')
         if not self.init_resp == None:
             self.init_resp.uci_update(uci, _respfile)

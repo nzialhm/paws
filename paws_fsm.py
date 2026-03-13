@@ -11,7 +11,10 @@ class PawsFSM(object):
         self.channel_id=0
         self.device = device
         self.state = "UCILOAD"
-        self.uci = UCIReader(uci_dir='/ect/config')
+        # windows
+        # uci = UCIReader(uci_dir='.\\config')
+        # linux openwrt
+        self.uci = UCIReader(uci_dir='/etc/config')
     def run(self):
         while True:
             # -----------------
@@ -125,7 +128,7 @@ class PawsFSM(object):
                 print("STATE: OPERATE")
                 _continue = self.uci.get('pawsfile', 'name', 'continue')
                 if _continue == 'true':
-                    self.state = "UCILOAD"
+                    self.state = "INIT"
                 if self._is_expired():
                     print("Spectrum expired → request again")
                     self.state = "AVAILABLE"
