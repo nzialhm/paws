@@ -5,7 +5,7 @@ from spectrumdb.spectrumdb_client import SpectrumDB
 from bs import BS
 from cpe import CPE
 from paws_fsm import PawsFSM
-
+from uciapp_reader import UCIReader
 SERVER = "https://www.tvws.kr/cmpipe/tvwsdb"
 DEVICE_TYPE = "bs"
 CONFIG = {
@@ -27,8 +27,14 @@ CONFIG = {
 }
 
 def main():
-    if DEVICE_TYPE == "bs":
-        db = SpectrumDB(SERVER)
+    # windows
+    uci = UCIReader(uci_dir='.\\config')
+    # linux openwrt
+    # uci = UCIReader(uci_dir='/ect/config')
+    _devicetype = uci.get('pawsfile', 'name', 'devicetype')
+    _serverurl = uci.get('pawsfile', 'name', 'serverurl')
+    if _devicetype == "bs":
+        db = SpectrumDB(_serverurl)
         device = BS(CONFIG, db)
         fsm = PawsFSM(device)
         fsm.run()

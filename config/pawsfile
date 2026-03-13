@@ -1,4 +1,6 @@
 config pawsfile 'name'
     option reqfile 'paws_req_kr'
     option respfile 'paws_resp_kr'
-    
+    option continue 'true'
+    option serverurl 'https://www.tvws.kr/cmpipe/tvwsdb'
+    option devicetype 'bs'
