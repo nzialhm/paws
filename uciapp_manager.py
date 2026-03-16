@@ -1,4 +1,4 @@
-# uciapp_reader.py
+# uciapp_manager.py
 # -*- coding: utf-8 -*-
 
 import sys
@@ -12,7 +12,6 @@ class UCIReader(object):
         """
         self.uci_dir = uci_dir
         self.is_windows = sys.platform.startswith('win')
-        print(self.is_windows)
 
     # ---------------- Windows용 파일 파서 ----------------
     def _parse_file(self, config_file):
@@ -61,7 +60,6 @@ class UCIReader(object):
 
                 else:
                     sections_order.append((None, raw_line))
-        print(config)
         return config, sections_order
 
     # ---------------- Windows용 파일 저장 ----------------

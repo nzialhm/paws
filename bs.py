@@ -4,7 +4,7 @@
 from base_device import BaseDevice
 from spectrumdb.req_models import *
 from spectrumdb.models import *
-from uciapp_reader import UCIReader
+from uciapp_manager import UCIReader
 
 class BS(BaseDevice):
     def __init__(self, config, db):

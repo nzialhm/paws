@@ -9,31 +9,23 @@ class InitResponse:
         """
         # 1. 'result' 키 추출 (없으면 빈 딕셔너리)
         # 전체 응답 딕셔너리일 수도 있고, result 부분만 넘어올 수도 있으므로 체크
-        print(result)
         self.type = result.get('type', '')
-        print(self.type)
         
         # 2. 'rulesetInfo' 추출
         ruleset_info = result.get('rulesetInfo', {})
-        print(ruleset_info)
         
         # 3. 'resultId' 추출하여 ruleset_ids 리스트에 저장
         # 서버 응답 예시: 'KsTvBandWhiteSpace-2015'
         self.device_id = ruleset_info.get('resultId', '')
-        print(self.device_id)
 
         self.maxPollingSecs = ruleset_info.get('maxPollingSecs', '')
-        print(self.maxPollingSecs)
 
         self.authority = ruleset_info.get('authority', '')
-        print(self.authority)
 
         self.maxLocationChange = ruleset_info.get('maxLocationChange', '')
-        print(self.maxLocationChange)
         
         # 추가 정보가 필요하다면 여기서 더 추출할 수 있습니다.
         self.version = result.get('version', '')
-        print(self.version)
         
     def __repr__(self):
         return "<InitResponse: type=%s, device_id=%s>" % (self.type, self.device_id)
@@ -44,7 +36,6 @@ class InitResponse:
         uci.set(file, 'InitResponse', 'maxPollingSecs', self.maxPollingSecs)
         uci.set(file, 'InitResponse', 'authority', self.authority)
         uci.set(file, 'InitResponse', 'maxLocationChange', self.maxLocationChange)
-        print(self.type)
     
 class RegisterResponse:
     def __init__(self, result):
@@ -53,9 +44,7 @@ class RegisterResponse:
         :param resp_dict: {u'result': {...}, u'id': u'xxxxxx'} 형태의 딕셔너리
         """
         # 1. 'result' 데이터 추출
-        print(result)
         self.type = result.get('type', '')
-        print(self.type)
         
         # 2. 서버 응답의 오타('ruelsetInfo')와 정상('rulesetInfo') 모두 대응
         # get('A')가 None이면 get('B')를 시도합니다.
@@ -65,16 +54,12 @@ class RegisterResponse:
         # 보통 rulesetId를 device_id의 식별자로 사용하므로 이를 할당합니다.
         # 만약 별도의 기기 ID가 응답에 포함된다면 해당 키값으로 수정하세요.
         self.device_id = ruleset_info.get('resultId', '')
-        print(self.device_id)
 
         self.maxPollingSecs = ruleset_info.get('maxPollingSecs', '')
-        print(self.maxPollingSecs)
 
         self.authority = ruleset_info.get('authority', '')
-        print(self.authority)
 
         self.maxLocationChange = ruleset_info.get('maxLocationChange', '')
-        print(self.maxLocationChange)
 
     def __repr__(self):
         return "<RegisterResponse: type=%s, device_id=%s>" % (self.type, self.device_id)
@@ -85,7 +70,6 @@ class RegisterResponse:
         uci.set(file, 'RegisterResponse', 'maxPollingSecs', self.maxPollingSecs)
         uci.set(file, 'RegisterResponse', 'authority', self.authority)
         uci.set(file, 'RegisterResponse', 'maxLocationChange', self.maxLocationChange)
-        print(self.type)
 
 class Channel(object):
     """개별 채널 정보를 담는 보조 객체"""
@@ -110,9 +94,7 @@ class AvailableSpectrumResponse(object):
         self.profiles = []  # 파싱된 Channel 객체들이 담길 리스트
         
         # 1. 'result' 데이터 추출
-        print(result)
         self.type = result.get('type', '')
-        print(self.type)
         
         # 2. 공통 EIRP 정보 추출 (deviceDesc 내 ksDeviceEmissionPower)
         # 서버 응답에 'serealNumber' 오타가 있어도 안전하게 처리하도록 구성
@@ -183,17 +165,12 @@ class AvailableSpectrumResponse(object):
         uci.set(file, 'AvailableSpectrumResponse', 'stopHz', ",".join(stop_hzs))
 
 
-        print(self.type)
-
-
 class NotifyResponse:
     def __init__(self, result, channel):
 
         self.select_channel=channel
         # 1. 'result' 데이터 추출
-        print(result)
         self.type = result.get('type', '')
-        print(self.type)
         
        
     def __repr__(self):
@@ -207,4 +184,3 @@ class NotifyResponse:
         uci.set(file, 'NotifyResponse', 'channelId', self.select_channel.channel_id)
         uci.set(file, 'NotifyResponse', 'startHz', self.select_channel.start_hz)
         uci.set(file, 'NotifyResponse', 'stopHz', self.select_channel.stop_hz)
-        print(self.type)

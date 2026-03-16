@@ -4,7 +4,7 @@
 import time
 from datetime import datetime
 from spectrumdb.models import *
-from uciapp_reader import UCIReader
+from uciapp_manager import UCIReader
 
 class PawsFSM(object):
     def __init__(self, device):

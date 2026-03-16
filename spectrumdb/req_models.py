@@ -15,7 +15,6 @@ class deviceDesc:
         self.ksCertId=uci.get(file, 'deviceDesc', 'ksCertId')
         self.ksDeviceType=uci.get(file, 'deviceDesc', 'ksDeviceType')
         self.modelId=uci.get(file, 'deviceDesc', 'modelId')
-        print(self.modelId)
 
     def to_dict(self):
         return {
@@ -34,7 +33,6 @@ class location:
     def uci_load(self, uci, file):
         self.latitude = uci.get(file, 'location', 'latitude')
         self.longitude = uci.get(file, 'location', 'longitude')
-        print(self.longitude)
 
     def to_dict(self):
         return {
@@ -76,7 +74,6 @@ class deviceOwner:
 
         self.owner_kind = uci.get(file, 'deviceOwner', 'owner_kind')
         self.owner_fn = uci.get(file, 'deviceOwner', 'owner_fn')
-        print(self.owner_fn)
 
     def to_dict(self):
         return {
@@ -106,7 +103,6 @@ class antennaCharacteristics:
     def uci_load(self, uci, file):
         self.heightType=uci.get(file, 'antennaCharacteristics', 'heightType')
         self.height=uci.get(file, 'antennaCharacteristics', 'height')
-        print(self.height)
 
     def to_dict(self):
         return  {
@@ -129,7 +125,6 @@ class masterDeviceDesc:
         self.ksCertId=uci.get(file, 'masterDeviceDesc', 'ksCertId')
         self.ksDeviceType=uci.get(file, 'masterDeviceDesc', 'ksDeviceType')
         self.modelId=uci.get(file, 'masterDeviceDesc', 'modelId')
-        print(self.modelId)
 
     def to_dict(self):
         return  {
@@ -148,7 +143,6 @@ class masterDeviceLocation:
     def uci_load(self, uci, file):
         self.latitude = uci.get(file, 'masterDeviceLocation', 'latitude')
         self.longitude = uci.get(file, 'masterDeviceLocation', 'longitude')
-        print(self.longitude)
 
     def to_dict(self):
         return {
@@ -175,7 +169,6 @@ class spectra:
         self.frequencyRanges[0]["startHz"] = uci.get(file, 'spectra', 'startHz')
         self.frequencyRanges[0]["stopHz"] = uci.get(file, 'spectra', 'stopHz')
         self.frequencyRanges[0]["channelId"] = uci.get(file, 'spectra', 'channelId')
-        print(self.bandwidth)
 
     def uci_update(self, uci, file):
         uci.set(file, 'spectra', 'bandwidth', self.bandwidth)

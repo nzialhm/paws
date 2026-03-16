@@ -5,7 +5,7 @@ from spectrumdb.spectrumdb_client import SpectrumDB
 from bs import BS
 from cpe import CPE
 from paws_fsm import PawsFSM
-from uciapp_reader import UCIReader
+from uciapp_manager import UCIReader
 SERVER = "https://www.tvws.kr/cmpipe/tvwsdb"
 DEVICE_TYPE = "bs"
 CONFIG = {

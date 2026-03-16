@@ -7,7 +7,7 @@ import urllib2
 from spectrumdb_response import SpectrumDBResponseParser
 from models import Channel
 from .req_models import *
-from uciapp_reader import UCIReader
+from uciapp_manager import UCIReader
 
 # 유니코드 딕셔너리를 utf-8 딕셔너리로 변환하는 함수
 def byteify(input):
@@ -54,7 +54,6 @@ class SpectrumDB(object):
         }
         self.id = self.id+1
         data = json.dumps(body)
-        print(data)
         req = urllib2.Request(
             self.server_url,
             data,
@@ -66,8 +65,6 @@ class SpectrumDB(object):
         if not resp_data:
             raise Exception("Empty response from Spectrum DB")
         resp_json = byteify(json.loads(resp_data))
-        print(resp_json)
-
         if "result" in resp_json:
             return resp_json["result"]
         raise Exception("PAWS DB Error: %s" % resp_json)
@@ -83,12 +80,10 @@ class SpectrumDB(object):
                 "deviceDesc": device._deviceDesc.to_dict(),
                 "location": device._location.to_dict()
             }
-        print(payload)
         resp = self._post(
             "spectrum.paws.init",
             payload
         )
-        print(resp)
         return SpectrumDBResponseParser.parse_init(resp)
 
     # -------------------------
@@ -149,5 +144,4 @@ class SpectrumDB(object):
             "spectrum.paws.notifySpectrumUse",
             payload
         )
-        print(resp)
         return SpectrumDBResponseParser.parse_notify(resp, device.channel)
