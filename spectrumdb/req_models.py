@@ -177,6 +177,12 @@ class spectra:
         self.frequencyRanges[0]["channelId"] = uci.get(file, 'spectra', 'channelId')
         print(self.bandwidth)
 
+    def uci_update(self, uci, file):
+        uci.set(file, 'spectra', 'bandwidth', self.bandwidth)
+        uci.set(file, 'spectra', 'startHz', self.frequencyRanges[0]["startHz"])
+        uci.set(file, 'spectra', 'stopHz', self.frequencyRanges[0]["stopHz"])
+        uci.set(file, 'spectra', 'channelId', self.frequencyRanges[0]["channelId"])
+
     def set_channelinfo(self, channel):
         self.bandwidth = channel.bandwidth
         self.frequencyRanges[0]["startHz"] = channel.start_hz

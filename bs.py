@@ -54,6 +54,7 @@ class BS(BaseDevice):
             self.available_resp.uci_update(uci, _respfile)
         if not self.notify_resp == None:
             self.notify_resp.uci_update(uci, _respfile)
+        self._spectra.uci_update(uci, _respfile)
 
  
 
