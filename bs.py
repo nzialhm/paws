@@ -10,6 +10,7 @@ class BS(BaseDevice):
     def __init__(self, config, db):
         BaseDevice.__init__(self, config)
         self.db = db
+        self.version = '1.0'
         self._deviceDesc = deviceDesc()
         self._location = location()
         self._masterDeviceDesc = masterDeviceDesc()
@@ -26,10 +27,11 @@ class BS(BaseDevice):
         pass
     def uci_load(self):
         # windows
-        # uci = UCIReader(uci_dir='.\\config')
+        uci = UCIReader(uci_dir='.\\config')
         # linux openwrt
-        uci = UCIReader(uci_dir='/etc/config')
-        _reqfile = uci.get('pawsfile', 'name', 'reqfile')
+        # uci = UCIReader(uci_dir='/etc/config')
+        _reqfile = 'paws'
+        self.version = uci.get(_reqfile, 'global', 'version')
         self._deviceDesc.uci_load(uci, _reqfile)
         self._location.uci_load(uci, _reqfile)
         self._masterDeviceDesc.uci_load(uci, _reqfile)
@@ -40,10 +42,10 @@ class BS(BaseDevice):
 
     def uci_update(self):
         # windows
-        # uci = UCIReader(uci_dir='.\\config')
+        uci = UCIReader(uci_dir='.\\config')
         # linux openwrt
-        uci = UCIReader(uci_dir='/etc/config')
-        _respfile = uci.get('pawsfile', 'name', 'respfile')
+        # uci = UCIReader(uci_dir='/etc/config')
+        _respfile = 'paws'
         if not self.init_resp == None:
             self.init_resp.uci_update(uci, _respfile)
         if not self.register_resp == None:

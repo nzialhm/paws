@@ -168,15 +168,19 @@ class AvailableSpectrumResponse(object):
         channel_ids = []
         start_hzs = []
         stop_hzs = []
-
+        loop = 0
         for ch in self.profiles:
+            if loop == 0:
+                uci.set(file, 'AvailableSpectrumResponse', 'startTime', ch.startTime)
+                uci.set(file, 'AvailableSpectrumResponse', 'stopTime', ch.stopTime)
             channel_ids.append(str(ch.channel_id))
             start_hzs.append(str(ch.start_hz))
             stop_hzs.append(str(ch.stop_hz))
+            loop = loop + 1
 
-        uci.set(file, 'NotifyResponse', 'channelId', ",".join(channel_ids))
-        uci.set(file, 'NotifyResponse', 'startHz', ",".join(start_hzs))
-        uci.set(file, 'NotifyResponse', 'stopHz', ",".join(stop_hzs))
+        uci.set(file, 'AvailableSpectrumResponse', 'channelId', ",".join(channel_ids))
+        uci.set(file, 'AvailableSpectrumResponse', 'startHz', ",".join(start_hzs))
+        uci.set(file, 'AvailableSpectrumResponse', 'stopHz', ",".join(stop_hzs))
 
 
         print(self.type)

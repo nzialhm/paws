@@ -28,11 +28,11 @@ CONFIG = {
 
 def main():
     # windows
-    # uci = UCIReader(uci_dir='.\\config')
+    uci = UCIReader(uci_dir='.\\config')
     # linux openwrt
-    uci = UCIReader(uci_dir='/etc/config')
-    _devicetype = uci.get('pawsfile', 'name', 'devicetype')
-    _serverurl = uci.get('pawsfile', 'name', 'serverurl')
+    # uci = UCIReader(uci_dir='/etc/config')
+    _devicetype = uci.get('paws', 'global', 'devicetype')
+    _serverurl = uci.get('paws', 'global', 'serverurl')
     if _devicetype == "bs":
         db = SpectrumDB(_serverurl)
         device = BS(CONFIG, db)

@@ -7,6 +7,7 @@ import urllib2
 from spectrumdb_response import SpectrumDBResponseParser
 from models import Channel
 from .req_models import *
+from uciapp_reader import UCIReader
 
 # 유니코드 딕셔너리를 utf-8 딕셔너리로 변환하는 함수
 def byteify(input):
@@ -35,13 +36,18 @@ class SpectrumDB(object):
     def __init__(self, server_url):
         self.server_url = server_url
         self.id = 1
+        # windows
+        uci = UCIReader(uci_dir='.\\config')
+        # linux openwrt
+        # uci = UCIReader(uci_dir='/etc/config')
+        self.jsonrpc = uci.get('paws', 'global', 'jsonrpc')
         self.headers = {
             "Content-Type": "application/json"
         }
 
     def _post(self, method, payload):
         body = {
-            "jsonrpc": "2.0",
+            "jsonrpc": str(self.jsonrpc),
             "method": method,
             "params": payload,
             "id": '{:0>6}'.format(self.id)
@@ -72,7 +78,7 @@ class SpectrumDB(object):
 
     def init_req(self, device):
         payload = {
-                "version": "1.0",
+                "version": str(device.version),
                 "type": "INIT_REQ",
                 "deviceDesc": device._deviceDesc.to_dict(),
                 "location": device._location.to_dict()
@@ -90,7 +96,7 @@ class SpectrumDB(object):
     # -------------------------
     def register_req(self, device):
         payload = {
-            "version": "1.0",
+            "version": str(device.version),
             "type": "REGISTRATION_REQ",
             "deviceDesc": device._deviceDesc.to_dict(),
             "location": device._location.to_dict(),
@@ -109,7 +115,7 @@ class SpectrumDB(object):
 
     def avail_req(self, device):
         payload = {
-            "version": "1.0",
+            "version": str(device.version),
             "type": "AVAIL_SPECTRUM_REQ",
             "deviceDesc": device._deviceDesc.to_dict(),
             "location": device._location.to_dict(),
@@ -130,7 +136,7 @@ class SpectrumDB(object):
 
     def notify_req(self, device):
         payload = {
-                "version": "1.0",
+                "version": str(device.version),
                 "type": "SPECTRUM_USE_NOTIFY",
                 "deviceDesc": device._deviceDesc.to_dict(),
                 "location": device._location.to_dict(),

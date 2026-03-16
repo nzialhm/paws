@@ -8,13 +8,14 @@ from uciapp_reader import UCIReader
 
 class PawsFSM(object):
     def __init__(self, device):
+        self.continuetime=0
         self.channel_id=0
         self.device = device
         self.state = "UCILOAD"
         # windows
-        # uci = UCIReader(uci_dir='.\\config')
+        self.uci = UCIReader(uci_dir='.\\config')
         # linux openwrt
-        self.uci = UCIReader(uci_dir='/etc/config')
+        # self.uci = UCIReader(uci_dir='/etc/config')
     def run(self):
         while True:
             # -----------------
@@ -30,7 +31,7 @@ class PawsFSM(object):
             elif self.state == "WAITRETRY":
                 print("STATE: WAITRETRY")
                 time.sleep(5)
-                self.state = "INIT"
+                self.state = "UCILOAD"
                 
             # -----------------
             # INIT
@@ -126,13 +127,22 @@ class PawsFSM(object):
             # -----------------
             elif self.state == "OPERATE":
                 print("STATE: OPERATE")
-                _continue = self.uci.get('pawsfile', 'name', 'continue')
-                if _continue == 'true':
-                    self.state = "INIT"
+                _continuetime = self.uci.get('paws', 'global', 'continuetime')
+                if type(_continuetime) == int:
+                    if _continuetime > 0 :
+                        self.uci.set('paws', 'global', 'continuetime', 0)
+                        self.continuetime = int(_continuetime)
+                        _continuetime = 0
+                    if self.continuetime > 0 :
+                        self.continuetime = self.continuetime - 1
+                        if self.continuetime <= 0:
+                            self.state = "UCILOAD"
+                            self.continuetime = 0
                 if self._is_expired():
                     print("Spectrum expired → request again")
-                    self.state = "AVAILABLE"
-                time.sleep(5)
+                    self.state = "UCILOAD"
+                    self.continuetime = 0
+                time.sleep(10)
 
     # -----------------
     # expire check
