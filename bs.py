@@ -25,11 +25,7 @@ class BS(BaseDevice):
 
     def apply_channel(self):
         pass
-    def uci_load(self):
-        # windows
-        uci = UCIReader(uci_dir='.\\config')
-        # linux openwrt
-        # uci = UCIReader(uci_dir='/etc/config')
+    def uci_load(self, uci):
         _reqfile = 'paws'
         self.version = uci.get(_reqfile, 'global', 'version')
         self._deviceDesc.uci_load(uci, _reqfile)
@@ -40,11 +36,7 @@ class BS(BaseDevice):
         self._antennaCharacteristics.uci_load(uci, _reqfile)
         self._spectra.uci_load(uci, _reqfile)
 
-    def uci_update(self):
-        # windows
-        uci = UCIReader(uci_dir='.\\config')
-        # linux openwrt
-        # uci = UCIReader(uci_dir='/etc/config')
+    def uci_update(self, uci):
         _respfile = 'paws'
         if not self.init_resp == None:
             self.init_resp.uci_update(uci, _respfile)

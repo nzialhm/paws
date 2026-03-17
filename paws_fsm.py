@@ -35,7 +35,7 @@ class PawsFSM(object):
             # -----------------
             if self.state == "UCILOAD":
                 print("STATE: UCILOAD")
-                self.device.uci_load()
+                self.device.uci_load(self.uci)
                 self.state = "INIT"
             # -----------------
             # WAITRETRY
@@ -132,7 +132,7 @@ class PawsFSM(object):
             # -----------------
             elif self.state == "UCIUPDATE":
                 print("STATE: UCIUPDATE")
-                self.device.uci_update()
+                self.device.uci_update(self.uci)
                 self.state = "OPERATE"
             # -----------------
             # OPERATE
@@ -148,11 +148,11 @@ class PawsFSM(object):
                     if self.continuetime > 0 :
                         self.continuetime = self.continuetime - 1
                         if self.continuetime <= 0:
-                            self.state = "UCILOAD"
+                            self.state = "UCIINIT"
                             self.continuetime = 0
                 if self._is_expired():
                     print("Spectrum expired → request again")
-                    self.state = "UCILOAD"
+                    self.state = "UCIINIT"
                     self.continuetime = 0
                 time.sleep(10)
 
