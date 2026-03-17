@@ -176,6 +176,14 @@ class spectra:
         uci.set(file, 'spectra', 'stopHz', self.frequencyRanges[0]["stopHz"])
         uci.set(file, 'spectra', 'channelId', self.frequencyRanges[0]["channelId"])
 
+    @staticmethod
+    def uci_init(uci):
+        _respfile = 'paws'
+        uci.set(_respfile, 'spectra', 'bandwidth', '')
+        uci.set(_respfile, 'spectra', 'startHz', '')
+        uci.set(_respfile, 'spectra', 'stopHz', '')
+        uci.set(_respfile, 'spectra', 'channelId', '')
+
     def set_channelinfo(self, channel):
         self.bandwidth = channel.bandwidth
         self.frequencyRanges[0]["startHz"] = channel.start_hz

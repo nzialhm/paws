@@ -4,6 +4,7 @@
 import time
 from datetime import datetime
 from spectrumdb.models import *
+from spectrumdb.req_models import *
 from uciapp_manager import UCIReader
 
 class PawsFSM(object):
@@ -11,13 +12,24 @@ class PawsFSM(object):
         self.continuetime=0
         self.channel_id=0
         self.device = device
-        self.state = "UCILOAD"
+        self.state = "UCIINIT"
         # windows
         self.uci = UCIReader(uci_dir='.\\config')
         # linux openwrt
         # self.uci = UCIReader(uci_dir='/etc/config')
     def run(self):
         while True:
+            # -----------------
+            # UCIINIT
+            # -----------------
+            if self.state == "UCIINIT":
+                print("STATE: UCIINIT")
+                spectra.uci_init(self.uci)
+                NotifyResponse.uci_init(self.uci)
+                AvailableSpectrumResponse.uci_init(self.uci)
+                RegisterResponse.uci_init(self.uci)
+                InitResponse.uci_init(self.uci)
+                self.state = "UCILOAD"
             # -----------------
             # UCILOAD
             # -----------------

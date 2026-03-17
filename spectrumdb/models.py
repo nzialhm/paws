@@ -17,14 +17,9 @@ class InitResponse:
         # 3. 'resultId' 추출하여 ruleset_ids 리스트에 저장
         # 서버 응답 예시: 'KsTvBandWhiteSpace-2015'
         self.device_id = ruleset_info.get('resultId', '')
-
         self.maxPollingSecs = ruleset_info.get('maxPollingSecs', '')
-
         self.authority = ruleset_info.get('authority', '')
-
         self.maxLocationChange = ruleset_info.get('maxLocationChange', '')
-        
-        # 추가 정보가 필요하다면 여기서 더 추출할 수 있습니다.
         self.version = result.get('version', '')
         
     def __repr__(self):
@@ -36,6 +31,15 @@ class InitResponse:
         uci.set(file, 'InitResponse', 'maxPollingSecs', self.maxPollingSecs)
         uci.set(file, 'InitResponse', 'authority', self.authority)
         uci.set(file, 'InitResponse', 'maxLocationChange', self.maxLocationChange)
+
+    @staticmethod
+    def uci_init(uci):
+        _respfile = 'paws'
+        uci.set(_respfile, 'InitResponse', 'type', '')
+        uci.set(_respfile, 'InitResponse', 'resultId', '')
+        uci.set(_respfile, 'InitResponse', 'maxPollingSecs', '')
+        uci.set(_respfile, 'InitResponse', 'authority', '')
+        uci.set(_respfile, 'InitResponse', 'maxLocationChange', '')
     
 class RegisterResponse:
     def __init__(self, result):
@@ -54,12 +58,10 @@ class RegisterResponse:
         # 보통 rulesetId를 device_id의 식별자로 사용하므로 이를 할당합니다.
         # 만약 별도의 기기 ID가 응답에 포함된다면 해당 키값으로 수정하세요.
         self.device_id = ruleset_info.get('resultId', '')
-
         self.maxPollingSecs = ruleset_info.get('maxPollingSecs', '')
-
         self.authority = ruleset_info.get('authority', '')
-
         self.maxLocationChange = ruleset_info.get('maxLocationChange', '')
+        self.version = result.get('version', '')
 
     def __repr__(self):
         return "<RegisterResponse: type=%s, device_id=%s>" % (self.type, self.device_id)
@@ -70,6 +72,15 @@ class RegisterResponse:
         uci.set(file, 'RegisterResponse', 'maxPollingSecs', self.maxPollingSecs)
         uci.set(file, 'RegisterResponse', 'authority', self.authority)
         uci.set(file, 'RegisterResponse', 'maxLocationChange', self.maxLocationChange)
+
+    @staticmethod
+    def uci_init(uci):
+        _respfile = 'paws'
+        uci.set(_respfile, 'RegisterResponse', 'type', '')
+        uci.set(_respfile, 'RegisterResponse', 'resultId', '')
+        uci.set(_respfile, 'RegisterResponse', 'maxPollingSecs', '')
+        uci.set(_respfile, 'RegisterResponse', 'authority', '')
+        uci.set(_respfile, 'RegisterResponse', 'maxLocationChange', '')
 
 class Channel(object):
     """개별 채널 정보를 담는 보조 객체"""
@@ -103,6 +114,7 @@ class AvailableSpectrumResponse(object):
         self.modelId = device_desc.get('modelId', '')
         self.serealNumber = device_desc.get('serealNumber', '')
         self.ksDeviceEmissionPower = device_desc.get('ksDeviceEmissionPower', 0.0)
+        self.version = result.get('version', '')
         
         # 3. 중첩된 스펙트럼 데이터 순회
         # spectrumSchedules -> spectra -> frequencyRanges 순서로 접근
@@ -164,6 +176,19 @@ class AvailableSpectrumResponse(object):
         uci.set(file, 'AvailableSpectrumResponse', 'startHz', ",".join(start_hzs))
         uci.set(file, 'AvailableSpectrumResponse', 'stopHz', ",".join(stop_hzs))
 
+    @staticmethod
+    def uci_init(uci):
+        _respfile = 'paws'
+        uci.set(_respfile, 'AvailableSpectrumResponse', 'type', '')
+        uci.set(_respfile, 'AvailableSpectrumResponse', 'modelId', '')
+        uci.set(_respfile, 'AvailableSpectrumResponse', 'serealNumber', '')
+        uci.set(_respfile, 'AvailableSpectrumResponse', 'ksDeviceEmissionPower', '')
+        uci.set(_respfile, 'AvailableSpectrumResponse', 'startTime', '')
+        uci.set(_respfile, 'AvailableSpectrumResponse', 'stopTime', '')
+        uci.set(_respfile, 'AvailableSpectrumResponse', 'channelId', '')
+        uci.set(_respfile, 'AvailableSpectrumResponse', 'startHz', '')
+        uci.set(_respfile, 'AvailableSpectrumResponse', 'stopHz', '')
+
 
 class NotifyResponse:
     def __init__(self, result, channel):
@@ -171,6 +196,7 @@ class NotifyResponse:
         self.select_channel=channel
         # 1. 'result' 데이터 추출
         self.type = result.get('type', '')
+        self.version = result.get('version', '')
         
        
     def __repr__(self):
@@ -178,9 +204,8 @@ class NotifyResponse:
 
     def uci_update(self, uci, file):
         uci.set(file, 'NotifyResponse', 'type', self.type)
-        uci.set(file, 'NotifyResponse', 'ksDeviceEmissionPower', self.select_channel.ksDeviceEmissionPower)
-        uci.set(file, 'NotifyResponse', 'startTime', self.select_channel.startTime)
-        uci.set(file, 'NotifyResponse', 'stopTime', self.select_channel.stopTime)
-        uci.set(file, 'NotifyResponse', 'channelId', self.select_channel.channel_id)
-        uci.set(file, 'NotifyResponse', 'startHz', self.select_channel.start_hz)
-        uci.set(file, 'NotifyResponse', 'stopHz', self.select_channel.stop_hz)
+
+    @staticmethod
+    def uci_init(uci):
+        _respfile = 'paws'
+        uci.set(_respfile, 'NotifyResponse', 'type', '')
