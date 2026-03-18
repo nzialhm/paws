@@ -14,6 +14,9 @@ class SpectrumDBResponseParser:
     def parse_available(resp_json):
         return AvailableSpectrumResponse(resp_json)
     @staticmethod
+    def parse_availablebatch(resp_json):
+        return AvailableBatchSpectrumResponse(resp_json)
+    @staticmethod
     def parse_notify(resp_json, channel):
         return NotifyResponse(resp_json, channel)
 

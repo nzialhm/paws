@@ -189,6 +189,9 @@ class AvailableSpectrumResponse(object):
         uci.set(_respfile, 'AvailableSpectrumResponse', 'startHz', '')
         uci.set(_respfile, 'AvailableSpectrumResponse', 'stopHz', '')
 
+class AvailableBatchSpectrumResponse(object):
+    def __init__(self, result):
+        self.profiles = []  # 파싱된 Channel 객체들이 담길 리스트
 
 class NotifyResponse:
     def __init__(self, result, channel):

@@ -53,6 +53,7 @@ class PawsFSM(object):
                 self.device.init_resp = None
                 self.device.register_resp = None
                 self.device.available_resp = None
+                self.device.availablebatch_resp = None
                 self.device.notify_resp = None
                 self.device.channel = None
                 self.device.expire_time="2026-00-01 01:00:00"
@@ -102,6 +103,27 @@ class PawsFSM(object):
                         self.state = "WAITRETRY"
                 except Exception as e:
                     print("AVAILABLE ERROR:", e)
+                    self.state = "WAITRETRY"
+            # -----------------
+            # AVAILABLE BATCH
+            # -----------------
+            elif self.state == "AVAILABLEBATCH":
+                print("STATE: AVAILABLEBATCH")
+                self.device.availablebatch_resp = None
+                try:
+                    self.device.availablebatch_resp = self.device.db.availbatch_req(self.device)
+                    if isinstance(self.device.availablebatch_resp, AvailableBatchSpectrumResponse):
+                        print(self.device.availablebatch_resp)
+                        size = len(self.device.availablebatch_resp.profiles)
+                        if size > 0:
+                            print(size)
+                            self.state = "USENOTIFY"
+                        else:
+                            self.state = "WAITRETRY"
+                    else:
+                        self.state = "WAITRETRY"
+                except Exception as e:
+                    print("AVAILABLEBATCH ERROR:", e)
                     self.state = "WAITRETRY"
                 
             # -----------------

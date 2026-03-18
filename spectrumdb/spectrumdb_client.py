@@ -126,6 +126,27 @@ class SpectrumDB(object):
         return SpectrumDBResponseParser.parse_available(resp)
 
     # -------------------------
+    # AVAILABLE BATCH
+    # -------------------------
+
+    def availbatch_req(self, device):
+        payload = {
+            "version": str(device.version),
+            "type": "AVAIL_SPECTRUM_BATCH_REQ",
+            "deviceDesc": device._deviceDesc.to_dict(),
+            "location": device._location.to_dict(),
+            "masterDeviceDesc": device._masterDeviceDesc.to_dict(),
+            "masterDeviceLocation": device._masterDeviceLocation.to_dict(),
+            "deviceOwner": device._deviceOwner.to_dict(),
+            "antennaCharacteristics": device._antennaCharacteristics.to_dict()
+        }
+        resp = self._post(
+            "spectrum.paws.Batch",
+            payload
+        )
+        return SpectrumDBResponseParser.parse_availablebatch(resp)
+
+    # -------------------------
     # USE NOTIFY
     # -------------------------
 
