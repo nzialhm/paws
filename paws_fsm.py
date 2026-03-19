@@ -183,6 +183,10 @@ class PawsFSM(object):
             elif self.state == "OPERATE":
                 write_log("STATE: OPERATE")
                 _continuecount = self.uci.get('paws', 'global', 'continuecount')
+                if isinstance(_continuecount, basestring):
+                    _continuecount = int(_continuecount)
+                    print("str")
+
                 if type(_continuecount) == int:
                     if _continuecount > 0 :
                         _continuecount = _continuecount - 1

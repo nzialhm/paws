@@ -8,6 +8,7 @@ from spectrumdb_response import SpectrumDBResponseParser
 from models import Channel
 from .req_models import *
 from uciapp_manager import UCIReader
+from log import write_log
 
 # 유니코드 딕셔너리를 utf-8 딕셔너리로 변환하는 함수
 def byteify(input):
@@ -51,6 +52,7 @@ class SpectrumDB(object):
         self.id = self.id+1
         data = json.dumps(body)
         print(data)
+        write_log(data)
         req = urllib2.Request(
             self.server_url,
             data,
@@ -59,6 +61,7 @@ class SpectrumDB(object):
         response = urllib2.urlopen(req)
         resp_data = fix_invalid_json(response.read())
         print(resp_data)
+        write_log(resp_data)
         if not resp_data:
             raise Exception("Empty response from Spectrum DB")
         resp_json = byteify(json.loads(resp_data))
