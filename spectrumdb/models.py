@@ -24,22 +24,8 @@ class InitResponse:
         
     def __repr__(self):
         return "<InitResponse: type=%s, device_id=%s>" % (self.type, self.device_id)
-
-    def uci_update(self, uci, file):
-        uci.set(file, 'InitResponse', 'type', self.type)
-        uci.set(file, 'InitResponse', 'resultId', self.device_id)
-        uci.set(file, 'InitResponse', 'maxPollingSecs', self.maxPollingSecs)
-        uci.set(file, 'InitResponse', 'authority', self.authority)
-        uci.set(file, 'InitResponse', 'maxLocationChange', self.maxLocationChange)
-
-    @staticmethod
-    def uci_init(uci):
-        _respfile = 'paws'
-        uci.set(_respfile, 'InitResponse', 'type', '')
-        uci.set(_respfile, 'InitResponse', 'resultId', '')
-        uci.set(_respfile, 'InitResponse', 'maxPollingSecs', '')
-        uci.set(_respfile, 'InitResponse', 'authority', '')
-        uci.set(_respfile, 'InitResponse', 'maxLocationChange', '')
+    def __str__(self):
+        return "<InitResponse: type=%s, device_id=%s>" % (self.type, self.device_id)
     
 class RegisterResponse:
     def __init__(self, result):
@@ -65,22 +51,8 @@ class RegisterResponse:
 
     def __repr__(self):
         return "<RegisterResponse: type=%s, device_id=%s>" % (self.type, self.device_id)
-
-    def uci_update(self, uci, file):
-        uci.set(file, 'RegisterResponse', 'type', self.type)
-        uci.set(file, 'RegisterResponse', 'resultId', self.device_id)
-        uci.set(file, 'RegisterResponse', 'maxPollingSecs', self.maxPollingSecs)
-        uci.set(file, 'RegisterResponse', 'authority', self.authority)
-        uci.set(file, 'RegisterResponse', 'maxLocationChange', self.maxLocationChange)
-
-    @staticmethod
-    def uci_init(uci):
-        _respfile = 'paws'
-        uci.set(_respfile, 'RegisterResponse', 'type', '')
-        uci.set(_respfile, 'RegisterResponse', 'resultId', '')
-        uci.set(_respfile, 'RegisterResponse', 'maxPollingSecs', '')
-        uci.set(_respfile, 'RegisterResponse', 'authority', '')
-        uci.set(_respfile, 'RegisterResponse', 'maxLocationChange', '')
+    def __str__(self):
+        return "<RegisterResponse: type=%s, device_id=%s>" % (self.type, self.device_id)
 
 class Channel(object):
     """개별 채널 정보를 담는 보조 객체"""
@@ -94,6 +66,10 @@ class Channel(object):
         self.stopTime = stopTime
 
     def __repr__(self):
+        return "<Channel ID: %s, start_hz: %sMHz, stop_hz: %sMHz, BW: %sMHz>" % (
+            self.channel_id, self.start_hz, self.stop_hz, self.bandwidth)
+
+    def __str__(self):
         return "<Channel ID: %s, start_hz: %sMHz, stop_hz: %sMHz, BW: %sMHz>" % (
             self.channel_id, self.start_hz, self.stop_hz, self.bandwidth)
 
@@ -152,42 +128,21 @@ class AvailableSpectrumResponse(object):
                     self.profiles.append(new_channel)
 
     def __repr__(self):
-        return "<SpectrumProfile: type=%s, Total %d channels found>" % (self.type, len(self.profiles))
+        return "<SpectrumProfile: type=%s, channel Total %d channels >" % (self.type, len(self.profiles))
+
+    def __str__(self):
+        return "<SpectrumProfile: type=%s, channel Total %d channels >" % (self.type, len(self.profiles))
 
     def uci_update(self, uci, file):
-        uci.set(file, 'AvailableSpectrumResponse', 'type', self.type)
-        uci.set(file, 'AvailableSpectrumResponse', 'modelId', self.modelId)
-        uci.set(file, 'AvailableSpectrumResponse', 'serealNumber', self.serealNumber)
-        uci.set(file, 'AvailableSpectrumResponse', 'ksDeviceEmissionPower', self.ksDeviceEmissionPower)
         channel_ids = []
-        start_hzs = []
-        stop_hzs = []
-        loop = 0
         for ch in self.profiles:
-            if loop == 0:
-                uci.set(file, 'AvailableSpectrumResponse', 'startTime', ch.startTime)
-                uci.set(file, 'AvailableSpectrumResponse', 'stopTime', ch.stopTime)
             channel_ids.append(str(ch.channel_id))
-            start_hzs.append(str(ch.start_hz))
-            stop_hzs.append(str(ch.stop_hz))
-            loop = loop + 1
-
-        uci.set(file, 'AvailableSpectrumResponse', 'channelId', ",".join(channel_ids))
-        uci.set(file, 'AvailableSpectrumResponse', 'startHz', ",".join(start_hzs))
-        uci.set(file, 'AvailableSpectrumResponse', 'stopHz', ",".join(stop_hzs))
+        uci.set(file, 'ch', 'avl_list', ",".join(channel_ids))
 
     @staticmethod
     def uci_init(uci):
         _respfile = 'paws'
-        uci.set(_respfile, 'AvailableSpectrumResponse', 'type', '')
-        uci.set(_respfile, 'AvailableSpectrumResponse', 'modelId', '')
-        uci.set(_respfile, 'AvailableSpectrumResponse', 'serealNumber', '')
-        uci.set(_respfile, 'AvailableSpectrumResponse', 'ksDeviceEmissionPower', '')
-        uci.set(_respfile, 'AvailableSpectrumResponse', 'startTime', '')
-        uci.set(_respfile, 'AvailableSpectrumResponse', 'stopTime', '')
-        uci.set(_respfile, 'AvailableSpectrumResponse', 'channelId', '')
-        uci.set(_respfile, 'AvailableSpectrumResponse', 'startHz', '')
-        uci.set(_respfile, 'AvailableSpectrumResponse', 'stopHz', '')
+        uci.set(_respfile, 'ch', 'avl_list', '')
 
 class AvailableBatchSpectrumResponse(object):
     def __init__(self, result):
@@ -205,10 +160,5 @@ class NotifyResponse:
     def __repr__(self):
         return "<UseNotify: type=%s>" % (self.type)
 
-    def uci_update(self, uci, file):
-        uci.set(file, 'NotifyResponse', 'type', self.type)
-
-    @staticmethod
-    def uci_init(uci):
-        _respfile = 'paws'
-        uci.set(_respfile, 'NotifyResponse', 'type', '')
+    def __str__(self):
+        return "<UseNotify: type=%s>" % (self.type)

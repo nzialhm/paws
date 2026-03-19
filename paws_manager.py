@@ -31,12 +31,12 @@ def main():
     uci = UCIReader(uci_dir='.\\config')
     # linux openwrt
     # uci = UCIReader(uci_dir='/etc/config')
-    _devicetype = uci.get('paws', 'global', 'devicetype')
+    _devicetype = uci.get('paws', 'dev', 'ksDeviceType')
     _serverurl = uci.get('paws', 'global', 'serverurl')
-    if _devicetype == "bs":
+    if _devicetype == "Portable Master" or _devicetype == "Fixed Master":
         db = SpectrumDB(_serverurl)
         device = BS(CONFIG, db)
-        fsm = PawsFSM(device)
+        fsm = PawsFSM(device, uci)
         fsm.run()
     else:
         device = CPE(CONFIG)

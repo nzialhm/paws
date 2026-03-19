@@ -5,6 +5,7 @@ from base_device import BaseDevice
 from spectrumdb.req_models import *
 from spectrumdb.models import *
 from uciapp_manager import UCIReader
+from log import write_log
 
 class BS(BaseDevice):
     def __init__(self, config, db):
@@ -27,25 +28,23 @@ class BS(BaseDevice):
         pass
     def uci_load(self, uci):
         _reqfile = 'paws'
-        self.version = uci.get(_reqfile, 'global', 'version')
         self._deviceDesc.uci_load(uci, _reqfile)
+        write_log(self._deviceDesc)
         self._location.uci_load(uci, _reqfile)
+        write_log(self._location)
         self._masterDeviceDesc.uci_load(uci, _reqfile)
+        write_log(self._masterDeviceDesc)
         self._masterDeviceLocation.uci_load(uci, _reqfile)
+        write_log(self._masterDeviceLocation)
         self._deviceOwner.uci_load(uci, _reqfile)
+        write_log(self._deviceOwner)
         self._antennaCharacteristics.uci_load(uci, _reqfile)
-        self._spectra.uci_load(uci, _reqfile)
+        write_log(self._antennaCharacteristics)
 
     def uci_update(self, uci):
         _respfile = 'paws'
-        if not self.init_resp == None:
-            self.init_resp.uci_update(uci, _respfile)
-        if not self.register_resp == None:
-            self.register_resp.uci_update(uci, _respfile)
         if not self.available_resp == None:
             self.available_resp.uci_update(uci, _respfile)
-        if not self.notify_resp == None:
-            self.notify_resp.uci_update(uci, _respfile)
         self._spectra.uci_update(uci, _respfile)
 
  

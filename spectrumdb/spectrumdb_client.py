@@ -36,11 +36,7 @@ class SpectrumDB(object):
     def __init__(self, server_url):
         self.server_url = server_url
         self.id = 1
-        # windows
-        uci = UCIReader(uci_dir='.\\config')
-        # linux openwrt
-        # uci = UCIReader(uci_dir='/etc/config')
-        self.jsonrpc = uci.get('paws', 'global', 'jsonrpc')
+        self.jsonrpc = '2.0'
         self.headers = {
             "Content-Type": "application/json"
         }
@@ -54,6 +50,7 @@ class SpectrumDB(object):
         }
         self.id = self.id+1
         data = json.dumps(body)
+        print(data)
         req = urllib2.Request(
             self.server_url,
             data,

@@ -7,4 +7,4 @@ class BaseDevice(object):
         self.channel = None
 
     def apply_channel(self):
-        print("Apply channel:", self.channel)
+        pass
