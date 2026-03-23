@@ -151,7 +151,7 @@ class PawsFSM(object):
                 write_log("STATE: USENOTIFY")
                 self.device.notify_resp = None
                 self.device.expire_time="2026-00-01 01:00:00"
-                if self.device.available_resp.profiles:
+                if len(self.device.available_resp.profiles) > 0:
                     self.device.channel = self.device.available_resp.profiles[0]
                     self.device._spectra.set_channelinfo(self.device.channel)
                     try:

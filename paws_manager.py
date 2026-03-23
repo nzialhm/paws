@@ -6,6 +6,8 @@ from bs import BS
 from cpe import CPE
 from paws_fsm import PawsFSM
 from uciapp_manager import UCIReader
+from bshttpserver import start_server_thread, setup_signal
+
 SERVER = "https://www.tvws.kr/cmpipe/tvwsdb"
 DEVICE_TYPE = "bs"
 CONFIG = {
@@ -36,6 +38,12 @@ def main():
     if _devicetype == "Portable Master" or _devicetype == "Fixed Master":
         db = SpectrumDB(_serverurl)
         device = BS(CONFIG, db)
+
+        # 서버 먼저 실행 (thread)
+        start_server_thread(device, uci)
+        # 시그널 등록
+        setup_signal()
+        # FSM 실행 (block)
         fsm = PawsFSM(device, uci)
         fsm.run()
     else:

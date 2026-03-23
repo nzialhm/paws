@@ -29,6 +29,6 @@ config paws 'owner'
     option owner_fn 'NZIA'
 
 config paws 'ch'
-    option avl_list '35,36,40,41,42,43,44,45,46,47,48,49,50,51,20,21,22,23,24,28,29,30,34'
-    option current '35'
+    option avl_list '28,29,30,34,35,36,40,41,42,43,44,45,46,47,48,49,50,51,20,21,22,23,24'
+    option current '28'
     option select 'auto' # 'auto|manual'

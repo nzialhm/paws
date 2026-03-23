@@ -126,6 +126,27 @@ class SpectrumDB(object):
         return SpectrumDBResponseParser.parse_available(resp)
 
     # -------------------------
+    # AVAILABLE NET CPE
+    # -------------------------
+
+    def availnet_req(self, device, _deviceDesc, _location, _antennaCharacteristics):
+        payload = {
+            "version": str(device.version),
+            "type": "AVAIL_SPECTRUM_REQ",
+            "deviceDesc": _deviceDesc,
+            "location": _location,
+            "masterDeviceDesc": device._masterDeviceDesc.to_dict(),
+            "masterDeviceLocation": device._masterDeviceLocation.to_dict(),
+            "deviceOwner": device._deviceOwner.to_dict(),
+            "antennaCharacteristics": _antennaCharacteristics
+        }
+        resp = self._post(
+            "spectrum.paws.getSpectrum",
+            payload
+        )
+        return resp
+
+    # -------------------------
     # AVAILABLE BATCH
     # -------------------------
 
@@ -166,3 +187,24 @@ class SpectrumDB(object):
             payload
         )
         return SpectrumDBResponseParser.parse_notify(resp, device.channel)
+
+    # -------------------------
+    # USE NOTIFY NET CPE
+    # -------------------------
+
+    def notifynet_req(self, device, _deviceDesc, _location, _spectra):
+        payload = {
+                "version": str(device.version),
+                "type": "SPECTRUM_USE_NOTIFY",
+                "deviceDesc": _deviceDesc.to_dict(),
+                "location": _location.to_dict(),
+                "antennaCharacteristics": device._antennaCharacteristics.to_dict(),
+                "masterDeviceDesc": device._masterDeviceDesc.to_dict(),
+                "masterDeviceLocation": device._masterDeviceLocation.to_dict(),
+                "spectra": _spectra.to_dict()
+            }
+        resp = self._post(
+            "spectrum.paws.notifySpectrumUse",
+            payload
+        )
+        return resp
