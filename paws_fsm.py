@@ -168,16 +168,16 @@ class PawsFSM(object):
                                     self.state = "UCIUPDATE"
                                 else:
                                     write_log("USENOTIFY Instance Failed")
-                                    self.state = "WAITRETRY"
+                                    self.state = "OPERATE"
                             else:
                                 write_log("get Channel class - channel_id select Failed")
                                 self.state = "OPERATE"
                         else:
                             write_log("Channel Arear Failed")
-                            self.state = "WAITRETRY"
+                            self.state = "OPERATE"
                     except Exception as e:
                         write_log("USENOTIFY ERROR: %s " % e)
-                        self.state = "WAITRETRY"
+                        self.state = "OPERATE"
                 else:
                     write_log("USENOTIFY ERROR: USE NOT CHANNEL !!")
                     self.state = "WAITRETRY"
