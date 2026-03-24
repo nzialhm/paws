@@ -23,7 +23,7 @@ class PawsFSM(object):
             # -----------------
             if self.state == "UCIINIT":
                 write_log("STATE: UCIINIT")
-                spectra.uci_init(self.uci)
+                self.device._spectra.init_channelinfo()
                 AvailableSpectrumResponse.uci_init(self.uci)
                 self.channel_id=self.uci.get('paws', 'ch', 'current')
                 if isinstance(self.channel_id, basestring):
@@ -207,7 +207,7 @@ class PawsFSM(object):
                         self.uci.set('paws', 'global', 'reload', 'n')
                         write_log("reload - paws again!!")
                         self.state = "UCIINIT"
-                        time.sleep(10)
+                        time.sleep(1)
                     else:
                         _current = self.uci.get('paws', 'ch', 'current')
                         if isinstance(_current, basestring):

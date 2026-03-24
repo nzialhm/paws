@@ -204,6 +204,12 @@ class spectra:
     def uci_update(self, uci, file):
         uci.set(file, 'ch', 'current', str(self.frequencyRanges[0]["channelId"]))
 
+    def init_channelinfo(self):
+        self.bandwidth = 6
+        self.frequencyRanges[0]["startHz"] = 0
+        self.frequencyRanges[0]["stopHz"] = 0
+        self.frequencyRanges[0]["channelId"] = 0
+
     @staticmethod
     def uci_init(uci):
         _respfile = 'paws'
