@@ -33,8 +33,34 @@ class location:
         self.longitude = 126.88381
     
     def uci_load(self, uci, file):
-        self.latitude = uci.get(file, 'dev', 'geo_lati')
-        self.longitude = uci.get(file, 'dev', 'geo_long')
+        try:
+            lat = uci.get(file, 'dev', 'geo_lati')
+            lon = uci.get(file, 'dev', 'geo_long')
+
+            # None 체크
+            if lat is None or lon is None:
+                return False
+
+            # 문자열 → float 변환
+            lat = float(lat)
+            lon = float(lon)
+
+            # 범위 체크
+            if not (-90.0 <= lat <= 90.0):
+                return False
+
+            if not (-180.0 <= lon <= 180.0):
+                return False
+
+            # 정상일 때만 저장
+            self.latitude = lat
+            self.longitude = lon
+
+            return True
+
+        except Exception as e:
+            print("uci_load error:", e)
+            return False
 
     def to_dict(self):
         return {

@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 class BaseDevice(object):
-    def __init__(self, config):
-        self.config = config
+    def __init__(self, _devicetype):
+        self.devicetype = _devicetype
         self.channel = None
 
-    def apply_channel(self):
-        pass
+    def apply_channel(self, _channel):
+        self.channel = _channel

@@ -14,20 +14,8 @@ class PawsFSM(object):
         self.device = device
         self.state = "UCIINIT"
         self.uci = uci
-        self.test_len1 = 0
-        self.test_geo_lati =[]
-        self.test_geo_lati.append('37.48055')
-        self.test_geo_lati.append('35.87490')
-        self.test_geo_lati.append('36.37376')
-        self.test_geo_long =[]
-        self.test_geo_long.append('126.88384')
-        self.test_geo_long.append('128.61777')
-        self.test_geo_long.append('127.31844')
+        self.select = "auto"
 
-        self.test_len2 = 0
-        self.test_ksDeviceType =[]
-        self.test_ksDeviceType.append('Portable Master')
-        self.test_ksDeviceType.append('Fixed Master')
     def run(self):
         while True:
             # -----------------
@@ -43,27 +31,20 @@ class PawsFSM(object):
             # -----------------
             if self.state == "UCILOAD":
                 write_log("STATE: UCILOAD")
+                self.select = self.uci.get('paws', 'ch', 'select')
                 self.device.uci_load(self.uci)
-                self.state = "INIT"
+                if self.device.blocationcheck:
+                    self.state = "INIT"
+                else:
+                    write_log("UCILOAD location data Failed !!")
+                    self.state = "WAITRETRY"
             # -----------------
             # WAITRETRY
             # -----------------
             elif self.state == "WAITRETRY":
                 write_log("STATE: WAITRETRY")
-                time.sleep(5)
-                self.uci.set('paws', 'dev', 'ksDeviceType', self.test_ksDeviceType[self.test_len1])
-                self.uci.set('paws', 'dev', 'geo_lati', self.test_geo_lati[self.test_len2])
-                self.uci.set('paws', 'dev', 'geo_long', self.test_geo_long[self.test_len2])
-
-                self.test_len1 = self.test_len1 + 1
-                if self.test_len1 > 1:
-                    self.test_len1 = 0
-                    
-                self.test_len2 = self.test_len2 + 1
-                if self.test_len2 > 2:
-                    self.test_len2 = 0
-
-                self.state = "UCILOAD"
+                time.sleep(20)
+                self.state = "UCIINIT"
                 
             # -----------------
             # INIT
@@ -77,12 +58,15 @@ class PawsFSM(object):
                 self.device.notify_resp = None
                 self.device.channel = None
                 self.device.expire_time="2026-00-01 01:00:00"
+                self.channel_id=0
+                self.uci.set('paws', 'ch', 'current', self.channel_id)
                 try:
                     self.device.init_resp = self.device.db.init_req(self.device)
                     if isinstance(self.device.init_resp, InitResponse):
                         write_log(self.device.init_resp)
                         self.state = "REGISTER"
                     else:
+                        write_log("INIT Failed")
                         self.state = "WAITRETRY"
                 except Exception as e:
                     write_log("INIT ERROR: %s" % e)
@@ -99,6 +83,7 @@ class PawsFSM(object):
                         write_log(self.device.register_resp)
                         self.state = "AVAILABLE"
                     else:
+                        write_log("REGISTER Failed")
                         self.state = "WAITRETRY"
                 except Exception as e:
                     write_log("REGISTER ERROR: %s" % e)
@@ -115,10 +100,17 @@ class PawsFSM(object):
                         write_log(self.device.available_resp)
                         size = len(self.device.available_resp.profiles)
                         if size > 0:
-                            self.state = "USENOTIFY"
+                            if self.select == 'auto':
+                                _Channel = self.device.available_resp.profiles[0]
+                                self.uci.set('paws', 'ch', 'current', _Channel.channel_id)
+                                self.state = "USENOTIFY"
+                            else:
+                                self.state = "UCIUPDATE"
                         else:
+                            write_log("AVAILABLE Not channel")
                             self.state = "WAITRETRY"
                     else:
+                        write_log("AVAILABLE Failed")
                         self.state = "WAITRETRY"
                 except Exception as e:
                     write_log("AVAILABLE ERROR: %s" % e)
@@ -135,10 +127,15 @@ class PawsFSM(object):
                         write_log(self.device.availablebatch_resp)
                         size = len(self.device.availablebatch_resp.profiles)
                         if size > 0:
-                            self.state = "USENOTIFY"
+                            if self.uci.get('paws', 'ch', 'select') == 'auto':
+                                self.state = "USENOTIFY"
+                            else:
+                                self.state = "UCIUPDATE"
                         else:
+                            write_log("AVAILABLEBATCH Not channel")
                             self.state = "WAITRETRY"
                     else:
+                        write_log("AVAILABLEBATCH Failed")
                         self.state = "WAITRETRY"
                 except Exception as e:
                     write_log("AVAILABLEBATCH ERROR: %s" % e)
@@ -151,17 +148,32 @@ class PawsFSM(object):
                 write_log("STATE: USENOTIFY")
                 self.device.notify_resp = None
                 self.device.expire_time="2026-00-01 01:00:00"
-                if self.device.available_resp.profiles:
-                    self.device.channel = self.device.available_resp.profiles[0]
-                    self.device._spectra.set_channelinfo(self.device.channel)
+                if len(self.device.available_resp.profiles)>0:
                     try:
-                        self.device.notify_resp = self.device.db.notify_req(self.device)
-                        if isinstance(self.device.notify_resp, NotifyResponse):
-                            write_log(self.device.notify_resp)
-                            self.device.expire_time=self.device.notify_resp.select_channel.stopTime
-                            self.channel_id=self.device.notify_resp.select_channel.channel_id
-                            self.state = "UCIUPDATE"
+                        _current = self.uci.get('paws', 'ch', 'current')
+                        if isinstance(_current, basestring):
+                            _current = int(_current)
+                        if _current >= 14:
+                            self.device.channel = self.device.available_resp.get_Channel(_current)
+                            if self.device.channel != None:
+                                self.device._spectra.set_channelinfo(self.device.channel)
+
+                                self.device.notify_resp = self.device.db.notify_req(self.device)
+                                if isinstance(self.device.notify_resp, NotifyResponse):
+                                    write_log(self.device.notify_resp)
+                                    self.device.expire_time=self.device.notify_resp.select_channel.stopTime
+                                    self.channel_id=self.device.notify_resp.select_channel.channel_id
+                                    if isinstance(self.channel_id, basestring):
+                                        self.channel_id = int(self.channel_id)
+                                    self.state = "UCIUPDATE"
+                                else:
+                                    write_log("USENOTIFY Instance Failed")
+                                    self.state = "WAITRETRY"
+                            else:
+                                write_log("get Channel class - channel_id select Failed")
+                                self.state = "WAITRETRY"
                         else:
+                            write_log("Channel Arear Failed")
                             self.state = "WAITRETRY"
                     except Exception as e:
                         write_log("USENOTIFY ERROR: %s " % e)
@@ -182,22 +194,28 @@ class PawsFSM(object):
             # -----------------
             elif self.state == "OPERATE":
                 write_log("STATE: OPERATE")
-                _continuecount = self.uci.get('paws', 'global', 'continuecount')
-                if isinstance(_continuecount, basestring):
-                    _continuecount = int(_continuecount)
-                    print("str")
+                _continuetime = self.uci.get('paws', 'global', 'continuetime')
+                if isinstance(_continuetime, basestring):
+                    _continuetime = int(_continuetime)
+                    print("_continuetime: %d" % _continuetime)
 
-                if type(_continuecount) == int:
-                    if _continuecount > 0 :
-                        _continuecount = _continuecount - 1
-                        self.uci.set('paws', 'global', 'continuecount', _continuecount)
-                        write_log("Spectrum request again")
-                        self.state = "WAITRETRY"
+                if _continuetime == 0:
+                    _current = self.uci.get('paws', 'ch', 'current')
+                    if isinstance(_current, basestring):
+                        _current = int(_current)
+                        print("current channel: %d" % _current)
+                    if _current >= 14 and _current != self.channel_id:
+                        self.state = "USENOTIFY"
+                    else:
+                        if self._is_expired():
+                            write_log("Spectrum expired request again")
+                            self.state = "UCIINIT"
+                        time.sleep(10)
+                else:
+                    self.state = "UCIINIT"
+                    time.sleep(_continuetime)
 
-                if self._is_expired():
-                    write_log("Spectrum expired request again")
-                    self.state = "AVAILABLE"
-                    time.sleep(10)
+
 
     # -----------------
     # expire check

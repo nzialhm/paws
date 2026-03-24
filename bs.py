@@ -8,9 +8,10 @@ from uciapp_manager import UCIReader
 from log import write_log
 
 class BS(BaseDevice):
-    def __init__(self, config, db):
-        BaseDevice.__init__(self, config)
+    def __init__(self, _devicetype, db):
+        BaseDevice.__init__(self, _devicetype)
         self.db = db
+        self.blocationcheck = False
         self.version = '1.0'
         self._deviceDesc = deviceDesc()
         self._location = location()
@@ -24,13 +25,11 @@ class BS(BaseDevice):
         self.available_resp = None
         self.notify_resp = None
 
-    def apply_channel(self):
-        pass
     def uci_load(self, uci):
         _reqfile = 'paws'
         self._deviceDesc.uci_load(uci, _reqfile)
         write_log(self._deviceDesc)
-        self._location.uci_load(uci, _reqfile)
+        self.blocationcheck = self._location.uci_load(uci, _reqfile)
         write_log(self._location)
         self._masterDeviceDesc.uci_load(uci, _reqfile)
         write_log(self._masterDeviceDesc)
@@ -46,6 +45,3 @@ class BS(BaseDevice):
         if not self.available_resp == None:
             self.available_resp.uci_update(uci, _respfile)
         self._spectra.uci_update(uci, _respfile)
-
- 
-

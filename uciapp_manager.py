@@ -145,6 +145,20 @@ class UCIReader(object):
                 return True
             except subprocess.CalledProcessError:
                 return False
+                
+    @staticmethod
+    def show_and_filter(self, keyword):
+        cmd = ['uci']
+        if self.uci_dir:
+            cmd.extend(['-c', self.uci_dir])
+        cmd.append('show')
+
+        try:
+            result = subprocess.check_output(cmd).decode()
+            lines = result.splitlines()
+            return [line for line in lines if keyword in line]
+        except subprocess.CalledProcessError:
+            return []
 
                 
 # ---------------- 사용 예제 ----------------
