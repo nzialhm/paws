@@ -57,7 +57,7 @@ class PawsFSM(object):
                 self.device.availablebatch_resp = None
                 self.device.notify_resp = None
                 self.device.channel = None
-                self.device.expire_time="2026-00-01 01:00:00"
+                self.device.expire_time=None
                 self.channel_id=0
                 self.uci.set('paws', 'ch', 'current', self.channel_id)
                 try:
@@ -147,7 +147,7 @@ class PawsFSM(object):
             elif self.state == "USENOTIFY":
                 write_log("STATE: USENOTIFY")
                 self.device.notify_resp = None
-                self.device.expire_time="2026-00-01 01:00:00"
+                self.device.expire_time=None
                 if len(self.device.available_resp.profiles)>0:
                     try:
                         _current = self.uci.get('paws', 'ch', 'current')
@@ -222,7 +222,7 @@ class PawsFSM(object):
     # -----------------
     def _is_expired(self):
         if not self.device.expire_time:
-            return True
+            return False
         expire = datetime.strptime(
             self.device.expire_time,
             "%Y-%m-%d %H:%M:%S"
