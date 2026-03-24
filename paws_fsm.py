@@ -171,7 +171,7 @@ class PawsFSM(object):
                                     self.state = "WAITRETRY"
                             else:
                                 write_log("get Channel class - channel_id select Failed")
-                                self.state = "WAITRETRY"
+                                self.state = "OPERATE"
                         else:
                             write_log("Channel Arear Failed")
                             self.state = "WAITRETRY"
