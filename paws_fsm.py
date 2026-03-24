@@ -59,7 +59,7 @@ class PawsFSM(object):
                 self.device.channel = None
                 self.device.expire_time=None
                 self.channel_id=0
-                self.uci.set('paws', 'ch', 'current', self.channel_id)
+                self.uci.set('paws', 'ch', 'current', str(self.channel_id))
                 try:
                     self.device.init_resp = self.device.db.init_req(self.device)
                     if isinstance(self.device.init_resp, InitResponse):
@@ -102,7 +102,7 @@ class PawsFSM(object):
                         if size > 0:
                             if self.select == 'auto':
                                 _Channel = self.device.available_resp.profiles[0]
-                                self.uci.set('paws', 'ch', 'current', _Channel.channel_id)
+                                self.uci.set('paws', 'ch', 'current', str(_Channel.channel_id))
                                 self.state = "USENOTIFY"
                             else:
                                 self.state = "UCIUPDATE"
