@@ -43,8 +43,8 @@ class PawsFSM(object):
             # -----------------
             elif self.state == "WAITRETRY":
                 write_log("STATE: WAITRETRY")
-                time.sleep(20)
                 self.state = "UCIINIT"
+                time.sleep(20)
                 
             # -----------------
             # INIT
@@ -200,17 +200,24 @@ class PawsFSM(object):
                     print("_continuetime: %d" % _continuetime)
 
                 if _continuetime == 0:
-                    _current = self.uci.get('paws', 'ch', 'current')
-                    if isinstance(_current, basestring):
-                        _current = int(_current)
-                        print("current channel: %d" % _current)
-                    if _current >= 14 and _current != self.channel_id:
-                        self.state = "USENOTIFY"
-                    else:
-                        if self._is_expired():
-                            write_log("Spectrum expired request again")
-                            self.state = "UCIINIT"
+                    _reload = self.uci.get('paws', 'global', 'reload')
+                    if _reload == 'y':
+                        self.uci.set('paws', 'global', 'reload', 'n')
+                        write_log("reload - paws again!!")
+                        self.state = "UCIINIT"
                         time.sleep(10)
+                    else:
+                        _current = self.uci.get('paws', 'ch', 'current')
+                        if isinstance(_current, basestring):
+                            _current = int(_current)
+                            print("current channel: %d" % _current)
+                        if _current >= 14 and _current != self.channel_id:
+                            self.state = "USENOTIFY"
+                        else:
+                            if self._is_expired():
+                                write_log("Spectrum expired request again")
+                                self.state = "UCIINIT"
+                            time.sleep(10)
                 else:
                     self.state = "UCIINIT"
                     time.sleep(_continuetime)
