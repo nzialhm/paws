@@ -1,5 +1,6 @@
 # req_models.py
 # -*- coding: utf-8 -*-
+from log import write_log
 
 class deviceDesc:
     def __init__(self):
@@ -59,7 +60,7 @@ class location:
             return True
 
         except Exception as e:
-            print("uci_load error:", e)
+            write_log("location uci_load error:: %s" % e)
             return False
 
     def to_dict(self):
@@ -201,12 +202,12 @@ class spectra:
         self.frequencyRanges.append(frequencyRanges_0)
 
     def uci_update(self, uci, file):
-        uci.set(file, 'ch', 'current', self.frequencyRanges[0]["channelId"])
+        uci.set(file, 'ch', 'current', str(self.frequencyRanges[0]["channelId"]))
 
     @staticmethod
     def uci_init(uci):
         _respfile = 'paws'
-        uci.set(_respfile, 'ch', 'current', '')
+        uci.set(_respfile, 'ch', 'current', '0')
 
     def set_channelinfo(self, channel):
         self.bandwidth = channel.bandwidth

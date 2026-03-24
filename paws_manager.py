@@ -6,6 +6,7 @@ from bs import BS
 from cpe import CPE
 from paws_fsm import PawsFSM
 from uciapp_manager import UCIReader
+from log import write_log
 
 def main():
     # windows
@@ -25,6 +26,6 @@ def main():
             device = CPE(_devicetype, uci)
             device.run()
     else:
-        print("paws process end!")
+        write_log("paws process end!")
 if __name__ == "__main__":
     main()

@@ -26,6 +26,8 @@ class PawsFSM(object):
                 spectra.uci_init(self.uci)
                 AvailableSpectrumResponse.uci_init(self.uci)
                 self.channel_id=self.uci.get('paws', 'ch', 'current')
+                if isinstance(self.channel_id, basestring):
+                    self.channel_id = int(self.channel_id)
                 self.state = "UCILOAD"
             # -----------------
             # UCILOAD
@@ -197,7 +199,7 @@ class PawsFSM(object):
                 _continuetime = self.uci.get('paws', 'global', 'continuetime')
                 if isinstance(_continuetime, basestring):
                     _continuetime = int(_continuetime)
-                    print("_continuetime: %d" % _continuetime)
+                    write_log("_continuetime: %d" % _continuetime)
 
                 if _continuetime == 0:
                     _reload = self.uci.get('paws', 'global', 'reload')
@@ -210,7 +212,7 @@ class PawsFSM(object):
                         _current = self.uci.get('paws', 'ch', 'current')
                         if isinstance(_current, basestring):
                             _current = int(_current)
-                            print("current channel: %d" % _current)
+                            write_log("current channel: %d" % _current)
                         write_log("OPERATE -> channel : current %d channel_id %d" % (_current, self.channel_id))
                         if _current >= 14 and _current != self.channel_id:
                             self.state = "USENOTIFY"

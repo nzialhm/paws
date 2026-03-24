@@ -51,8 +51,7 @@ class SpectrumDB(object):
         }
         self.id = self.id+1
         data = json.dumps(body)
-        print(data)
-        write_log(data)
+         write_log(data)
         req = urllib2.Request(
             self.server_url,
             data,
@@ -60,7 +59,6 @@ class SpectrumDB(object):
         )
         response = urllib2.urlopen(req)
         resp_data = fix_invalid_json(response.read())
-        print(resp_data)
         write_log(resp_data)
         if not resp_data:
             raise Exception("Empty response from Spectrum DB")
