@@ -7,13 +7,14 @@ import subprocess
 
 class UCIReader(object):
     # True | False
-    USE_CONFIG = False
+    IS_WIN = False
     def __init__(self, uci_dir=None):
         """
         :param uci_dir: UCI 파일이 있는 디렉토리
         """
         self.uci_dir = uci_dir
         self.usewin_config = sys.platform.startswith('win')
+        UCIReader.IS_WIN = self.usewin_config
 
     # ---------------- Windows용 파일 파서 ----------------
     def _parse_file(self, config_file):
@@ -93,7 +94,7 @@ class UCIReader(object):
 
     # ---------------- 읽기 ----------------
     def get(self, config, section, option):
-        if self.usewin_config or UCIReader.USE_CONFIG:
+        if self.usewin_config:
             if not self.uci_dir:
                 raise ValueError("Windows 테스트용으로 uci_dir 필요")
 
@@ -116,7 +117,7 @@ class UCIReader(object):
 
     # ---------------- 쓰기 ----------------
     def set(self, config, section, option, value):
-        if self.usewin_config or UCIReader.USE_CONFIG:
+        if self.usewin_config:
             if not self.uci_dir:
                 raise ValueError("Windows 테스트용으로 uci_dir 필요")
             file_path = os.path.join(self.uci_dir, config)
@@ -150,7 +151,7 @@ class UCIReader(object):
                 
     @staticmethod
     def show_and_filter(keyword):
-        if UCIReader.USE_CONFIG:
+        if UCIReader.IS_WIN == False:
             cmd = ['uci']
             cmd.append('show')
 
