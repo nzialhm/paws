@@ -15,6 +15,8 @@ class PawsFSM(object):
         self.state = "UCIINIT"
         self.uci = uci
         self.select = "auto"
+        self.geo_lati = '0'
+        self.geo_long = "0"
 
     def run(self):
         while True:
@@ -26,9 +28,6 @@ class PawsFSM(object):
                 self.device._spectra.init_channelinfo()
                 spectra.uci_init(self.uci)
                 AvailableSpectrumResponse.uci_init(self.uci)
-                self.channel_id=self.uci.get('paws', 'ch', 'current')
-                if isinstance(self.channel_id, basestring):
-                    self.channel_id = int(self.channel_id)
                 self.state = "UCILOAD"
             # -----------------
             # UCILOAD
@@ -36,6 +35,11 @@ class PawsFSM(object):
             if self.state == "UCILOAD":
                 write_log("STATE: UCILOAD")
                 self.select = self.uci.get('paws', 'ch', 'select')
+                self.channel_id = self.uci.get('paws', 'ch', 'current')
+                if isinstance(self.channel_id, basestring):
+                    self.channel_id = int(self.channel_id)
+                self.geo_lati = self.uci.get('paws', 'dev', 'geo_lati')
+                self.geo_long = self.uci.get('paws', 'dev', 'geo_long')
                 self.device.uci_load(self.uci)
                 if self.device.blocationcheck:
                     self.state = "INIT"
@@ -225,11 +229,17 @@ class PawsFSM(object):
                         time.sleep(1)
                     else:
                         _current = self.uci.get('paws', 'ch', 'current')
+                        _geo_lati = self.uci.get('paws', 'dev', 'geo_lati')
+                        _geo_long = self.uci.get('paws', 'dev', 'geo_long')
                         if isinstance(_current, basestring):
                             _current = int(_current)
                             write_log("current channel: %d" % _current)
-                        write_log("OPERATE -> channel : current %d channel_id %d" % (_current, self.channel_id))
-                        if _current >= 14 and _current != self.channel_id:
+                        write_log("OPERATE -> geo_lati : uci %s cur %s" % (_geo_lati, self.geo_lati))
+                        write_log("OPERATE -> geo_long : uci %s cur %s" % (_geo_long, self.geo_long))
+                        write_log("OPERATE -> channel_id : uci %d cur %d" % (_current, self.channel_id))
+                        if _geo_lati != self.geo_lati and _geo_long != self.geo_long:
+                            self.state = "UCIINIT"
+                        elif (_current>=14 and _current<=51) and _current != self.channel_id:
                             self.state = "USENOTIFY"
                         else:
                             if self._is_expired():

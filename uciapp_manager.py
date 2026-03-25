@@ -156,7 +156,7 @@ class UCIReader(object):
             cmd.append('show')
 
             try:
-                result = subprocess.check_output(cmd).decode()
+                result = subprocess.check_output(cmd).decode('utf-8', 'replace')
                 lines = result.splitlines()
                 return [line for line in lines if keyword in line]
             except subprocess.CalledProcessError:
