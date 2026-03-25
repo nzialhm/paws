@@ -24,6 +24,7 @@ class PawsFSM(object):
             if self.state == "UCIINIT":
                 write_log("STATE: UCIINIT")
                 self.device._spectra.init_channelinfo()
+                spectra.uci_init(self.uci)
                 AvailableSpectrumResponse.uci_init(self.uci)
                 self.channel_id=self.uci.get('paws', 'ch', 'current')
                 if isinstance(self.channel_id, basestring):
@@ -46,8 +47,19 @@ class PawsFSM(object):
             # -----------------
             elif self.state == "WAITRETRY":
                 write_log("STATE: WAITRETRY")
+                loop = 0
+                looptime = 10
+                while True:
+                    _retrytime = self.uci.get('paws', 'global', 'retrytime')
+                    if isinstance(_retrytime, basestring):
+                        _retrytime = int(_retrytime)
+                    if(loop < _retrytime):
+                        write_log("retrytime - real %d setting %d " % (loop, _retrytime))
+                        loop = loop + looptime
+                        time.sleep(looptime)
+                    else:
+                        break
                 self.state = "UCIINIT"
-                time.sleep(20)
                 
             # -----------------
             # INIT
@@ -110,7 +122,7 @@ class PawsFSM(object):
                                 self.state = "UCIUPDATE"
                         else:
                             write_log("AVAILABLE Not channel")
-                            self.state = "WAITRETRY"
+                            self.state = "OPERATE"
                     else:
                         write_log("AVAILABLE Failed")
                         self.state = "WAITRETRY"
@@ -129,7 +141,7 @@ class PawsFSM(object):
                         write_log(self.device.availablebatch_resp)
                         size = len(self.device.availablebatch_resp.profiles)
                         if size > 0:
-                            if self.uci.get('paws', 'ch', 'select') == 'auto':
+                            if self.select == 'auto':
                                 self.state = "USENOTIFY"
                             else:
                                 self.state = "UCIUPDATE"
@@ -150,12 +162,12 @@ class PawsFSM(object):
                 write_log("STATE: USENOTIFY")
                 self.device.notify_resp = None
                 self.device.expire_time=None
-                if len(self.device.available_resp.profiles)>0:
+                if self.device.available_resp and len(self.device.available_resp.profiles)>0:
                     try:
                         _current = self.uci.get('paws', 'ch', 'current')
                         if isinstance(_current, basestring):
                             _current = int(_current)
-                        if _current >= 14:
+                        if _current >= 14 and _current <= 51:
                             self.device.channel = self.device.available_resp.get_Channel(_current)
                             if self.device.channel != None:
                                 self.device._spectra.set_channelinfo(self.device.channel)
@@ -182,7 +194,7 @@ class PawsFSM(object):
                         self.state = "OPERATE"
                 else:
                     write_log("USENOTIFY ERROR: USE NOT CHANNEL !!")
-                    self.state = "WAITRETRY"
+                    self.state = "OPERATE"
 
             # -----------------
             # UCIUPDATE
@@ -190,6 +202,9 @@ class PawsFSM(object):
             elif self.state == "UCIUPDATE":
                 write_log("STATE: UCIUPDATE")
                 self.device.uci_update(self.uci)
+                lines = UCIReader.show_and_filter('paws')
+                for line in lines:
+                    write_log(line)
                 self.state = "OPERATE"
             # -----------------
             # OPERATE
@@ -222,9 +237,29 @@ class PawsFSM(object):
                                 self.state = "UCIINIT"
                             time.sleep(10)
                 else:
-                    self.state = "UCIINIT"
-                    time.sleep(_continuetime)
-
+                    if self.select == 'auto':
+                        loop = 0
+                        looptime = 10
+                        while True:
+                            _continuetime = self.uci.get('paws', 'global', 'continuetime')
+                            if isinstance(_continuetime, basestring):
+                                _continuetime = int(_continuetime)
+                            if(loop < _continuetime):
+                                write_log("continuetime - real %d setting %d " % (loop, _continuetime))
+                                loop = loop + looptime
+                                time.sleep(looptime)
+                                _reload = self.uci.get('paws', 'global', 'reload')
+                                if _reload == 'y':
+                                    self.uci.set('paws', 'global', 'continuetime', '0')
+                                    self.uci.set('paws', 'global', 'reload', 'n')
+                                    write_log("reload - paws again!!")
+                                    break
+                            else:
+                                break
+                        self.state = "UCIINIT"
+                    else:
+                        self.uci.set('paws', 'global', 'continuetime', '0')
+                        write_log("select : manual mode reload failed - continuetime 0 !!")
 
 
     # -----------------

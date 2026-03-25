@@ -6,12 +6,14 @@ import os
 import subprocess
 
 class UCIReader(object):
+    # True | False
+    USE_CONFIG = False
     def __init__(self, uci_dir=None):
         """
         :param uci_dir: UCI 파일이 있는 디렉토리
         """
         self.uci_dir = uci_dir
-        self.is_windows = sys.platform.startswith('win')
+        self.usewin_config = sys.platform.startswith('win')
 
     # ---------------- Windows용 파일 파서 ----------------
     def _parse_file(self, config_file):
@@ -91,7 +93,7 @@ class UCIReader(object):
 
     # ---------------- 읽기 ----------------
     def get(self, config, section, option):
-        if self.is_windows:
+        if self.usewin_config or UCIReader.USE_CONFIG:
             if not self.uci_dir:
                 raise ValueError("Windows 테스트용으로 uci_dir 필요")
 
@@ -114,7 +116,7 @@ class UCIReader(object):
 
     # ---------------- 쓰기 ----------------
     def set(self, config, section, option, value):
-        if self.is_windows:
+        if self.usewin_config or UCIReader.USE_CONFIG:
             if not self.uci_dir:
                 raise ValueError("Windows 테스트용으로 uci_dir 필요")
             file_path = os.path.join(self.uci_dir, config)
@@ -147,17 +149,18 @@ class UCIReader(object):
                 return False
                 
     @staticmethod
-    def show_and_filter(self, keyword):
-        cmd = ['uci']
-        if self.uci_dir:
-            cmd.extend(['-c', self.uci_dir])
-        cmd.append('show')
+    def show_and_filter(keyword):
+        if UCIReader.USE_CONFIG:
+            cmd = ['uci']
+            cmd.append('show')
 
-        try:
-            result = subprocess.check_output(cmd).decode()
-            lines = result.splitlines()
-            return [line for line in lines if keyword in line]
-        except subprocess.CalledProcessError:
+            try:
+                result = subprocess.check_output(cmd).decode()
+                lines = result.splitlines()
+                return [line for line in lines if keyword in line]
+            except subprocess.CalledProcessError:
+                return []
+        else:
             return []
 
                 
