@@ -7,10 +7,10 @@ DEVICE = "/dev/mmcblk1p6"
 
 
 ########################################
-# 1. RAW config 읽기
+# 1. RAW config 전체 읽기
 ########################################
 def read_all_config(device=DEVICE):
-    cfg = []
+    cfg = {}
     s = ""
     end = 0
 
@@ -25,7 +25,8 @@ def read_all_config(device=DEVICE):
             end += 1
             if s:
                 parts = s.split("=", 1)
-                cfg.append(parts)
+                if len(parts) > 1:
+                    cfg[parts[0]] = parts[1]
             s = ""
 
             if end > 1:
@@ -39,50 +40,17 @@ def read_all_config(device=DEVICE):
 
 
 ########################################
-# 2. 값 조회
+# 2. 전체 저장 (한 번에 write)
 ########################################
-def get_value(name, device=DEVICE):
-    cfg = read_all_config(device)
-
-    for line in cfg:
-        if len(line) > 1 and line[0] == name:
-            return line[1]
-
-    return ""
-
-
-########################################
-# 3. 값 설정
-########################################
-def set_value(name, value, device=DEVICE):
-    cfg = read_all_config(device)
-
-    new_cfg = []
-    found = 0
-
-    for line in cfg:
-        if len(line) > 1:
-            n = line[0]
-            v = line[1]
-
-            if n == name:
-                found = 1
-                if value != "":
-                    new_cfg.append((name, value))
-            else:
-                if n != "" and v != "":
-                    new_cfg.append((n, v))
-
-    if found == 0 and value != "":
-        new_cfg.append((name, value))
-
+def write_all_config(cfg, device=DEVICE):
     f = open(device, 'r+b')
     f.seek(0)
 
     data = ""
 
-    for n, v in new_cfg:
-        data += n + "=" + v + '\0'
+    for n, v in cfg.items():
+        if n and v:
+            data += n + "=" + v + '\0'
 
     data += '\0'
 
@@ -91,7 +59,7 @@ def set_value(name, value, device=DEVICE):
 
 
 ########################################
-# 4. 입력 루프
+# 3. 입력 루프 (빈값 방지)
 ########################################
 def input_loop(prompt):
     while True:
@@ -99,45 +67,47 @@ def input_loop(prompt):
         sys.stdout.flush()
         value = sys.stdin.readline().strip()
 
-        if value != "":
+        if value:
             return value
 
         print "Invalid input. Please try again."
 
 
 ########################################
-# 5. 값 보장 (없으면 입력받고 저장)
-########################################
-def ensure_value(name, prompt):
-    value = get_value(name)
-
-    while value == "":
-        value = input_loop(prompt)
-        set_value(name, value)
-
-        # 저장 확인
-        value = get_value(name)
-
-    return value
-
-
-########################################
-# 6. 메인 (내부 로직만 실행)
+# 4. 메인
 ########################################
 def main():
     print "=============="
 
-    serial = ensure_value("serialnum", "Please input serial number: ")
-    mode = ensure_value("nct11af_mode", "Please input operation mode[ap|sta]: ")
-    mod0 = ensure_value("nct11af0_module", "Please input nct11af0 module type[hpa]: ")
-    mod1 = ensure_value("nct11af1_module", "Please input nct11af1 module type[tn]: ")
+    # 기존 config 읽기
+    cfg = read_all_config()
+
+    # 필요한 항목
+    keys = [
+        ("serialnum", "Please input serial number: "),
+        ("nct11af_mode", "Please input operation mode[ap|sta]: "),
+        ("nct11af0_module", "Please input nct11af0 module type[hpa]: "),
+        ("nct11af1_module", "Please input nct11af1 module type[tn]: "),
+    ]
+
+    updated = False
+
+    # 없는 값만 입력
+    for name, prompt in keys:
+        if not cfg.get(name):
+            cfg[name] = input_loop(prompt)
+            updated = True
+
+    # 한 번만 저장
+    if updated:
+        write_all_config(cfg)
 
     print "=============="
     print "Report"
-    print "  Serial number : %s" % serial
-    print "  Operation mode : %s" % mode
-    print "  Nct11af0 module type : %s" % mod0
-    print "  Nct11af1 module type : %s" % mod1
+    print "  Serial number        : %s" % cfg.get("serialnum", "")
+    print "  Operation mode       : %s" % cfg.get("nct11af_mode", "")
+    print "  Nct11af0 module type : %s" % cfg.get("nct11af0_module", "")
+    print "  Nct11af1 module type : %s" % cfg.get("nct11af1_module", "")
 
 
 if __name__ == "__main__":

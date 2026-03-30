@@ -7,6 +7,7 @@ from spectrumdb.models import *
 from spectrumdb.req_models import *
 from uciapp_manager import UCIReader
 from log import write_log
+RUN_TIME = 10
 
 class PawsFSM(object):
     def __init__(self, device, uci):
@@ -32,7 +33,7 @@ class PawsFSM(object):
             # -----------------
             # UCILOAD
             # -----------------
-            if self.state == "UCILOAD":
+            elif self.state == "UCILOAD":
                 write_log("STATE: UCILOAD")
                 self.select = self.uci.get('paws', 'ch', 'select')
                 self.channel_id = self.uci.get('paws', 'ch', 'current')
@@ -52,7 +53,7 @@ class PawsFSM(object):
             elif self.state == "WAITRETRY":
                 write_log("STATE: WAITRETRY")
                 loop = 0
-                looptime = 10
+                looptime = RUN_TIME
                 while True:
                     _retrytime = self.uci.get('paws', 'global', 'retrytime')
                     if isinstance(_retrytime, basestring):
@@ -215,62 +216,31 @@ class PawsFSM(object):
             # -----------------
             elif self.state == "OPERATE":
                 write_log("STATE: OPERATE")
-                _continuetime = self.uci.get('paws', 'global', 'continuetime')
-                if isinstance(_continuetime, basestring):
-                    _continuetime = int(_continuetime)
-                    write_log("_continuetime: %d" % _continuetime)
-
-                if _continuetime == 0:
-                    _reload = self.uci.get('paws', 'global', 'reload')
-                    if _reload == 'y':
-                        self.uci.set('paws', 'global', 'reload', 'n')
-                        write_log("reload - paws again!!")
-                        self.state = "UCIINIT"
-                        time.sleep(1)
-                    else:
-                        _current = self.uci.get('paws', 'ch', 'current')
-                        _geo_lati = self.uci.get('paws', 'dev', 'geo_lati')
-                        _geo_long = self.uci.get('paws', 'dev', 'geo_long')
-                        if isinstance(_current, basestring):
-                            _current = int(_current)
-                            write_log("current channel: %d" % _current)
-                        write_log("OPERATE -> geo_lati : uci %s cur %s" % (_geo_lati, self.geo_lati))
-                        write_log("OPERATE -> geo_long : uci %s cur %s" % (_geo_long, self.geo_long))
-                        write_log("OPERATE -> channel_id : uci %d cur %d" % (_current, self.channel_id))
-                        if _geo_lati != self.geo_lati and _geo_long != self.geo_long:
-                            self.state = "UCIINIT"
-                        elif (_current>=14 and _current<=51) and _current != self.channel_id:
-                            self.state = "USENOTIFY"
-                        else:
-                            if self._is_expired():
-                                write_log("Spectrum expired request again")
-                                self.state = "UCIINIT"
-                            time.sleep(10)
+                _reload = self.uci.get('paws', 'global', 'reload')
+                if _reload == 'y':
+                    self.uci.set('paws', 'global', 'reload', 'n')
+                    write_log("reload - paws again!!")
+                    self.state = "UCIINIT"
                 else:
-                    if self.select == 'auto':
-                        loop = 0
-                        looptime = 10
-                        while True:
-                            _continuetime = self.uci.get('paws', 'global', 'continuetime')
-                            if isinstance(_continuetime, basestring):
-                                _continuetime = int(_continuetime)
-                            if(loop < _continuetime):
-                                write_log("continuetime - real %d setting %d " % (loop, _continuetime))
-                                loop = loop + looptime
-                                time.sleep(looptime)
-                                _reload = self.uci.get('paws', 'global', 'reload')
-                                if _reload == 'y':
-                                    self.uci.set('paws', 'global', 'continuetime', '0')
-                                    self.uci.set('paws', 'global', 'reload', 'n')
-                                    write_log("reload - paws again!!")
-                                    break
-                            else:
-                                break
+                    _current = self.uci.get('paws', 'ch', 'current')
+                    _geo_lati = self.uci.get('paws', 'dev', 'geo_lati')
+                    _geo_long = self.uci.get('paws', 'dev', 'geo_long')
+                    if isinstance(_current, basestring):
+                        _current = int(_current)
+                        write_log("current channel: %d" % _current)
+                    write_log("OPERATE -> geo_lati : uci %s cur %s" % (_geo_lati, self.geo_lati))
+                    write_log("OPERATE -> geo_long : uci %s cur %s" % (_geo_long, self.geo_long))
+                    write_log("OPERATE -> channel_id : uci %d cur %d" % (_current, self.channel_id))
+                    if _geo_lati != self.geo_lati and _geo_long != self.geo_long:
                         self.state = "UCIINIT"
+                    elif (_current>=14 and _current<=51) and _current != self.channel_id:
+                        self.state = "USENOTIFY"
                     else:
-                        self.uci.set('paws', 'global', 'continuetime', '0')
-                        write_log("select : manual mode reload failed - continuetime 0 !!")
-
+                        if self._is_expired():
+                            write_log("Spectrum expired request again")
+                            self.state = "UCIINIT"
+                        time.sleep(RUN_TIME)
+                
 
     # -----------------
     # expire check
