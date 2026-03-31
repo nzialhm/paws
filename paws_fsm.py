@@ -8,6 +8,7 @@ from spectrumdb.req_models import *
 from uciapp_manager import UCIReader
 from log import write_log
 RUN_TIME = 10
+WAITRETRY_TIME = 300
 
 class PawsFSM(object):
     def __init__(self, device, uci):
@@ -55,9 +56,7 @@ class PawsFSM(object):
                 loop = 0
                 looptime = RUN_TIME
                 while True:
-                    _retrytime = self.uci.get('paws', 'global', 'retrytime')
-                    if isinstance(_retrytime, basestring):
-                        _retrytime = int(_retrytime)
+                    _retrytime = WAITRETRY_TIME
                     if(loop < _retrytime):
                         write_log("retrytime - real %d setting %d " % (loop, _retrytime))
                         loop = loop + looptime
@@ -167,6 +166,7 @@ class PawsFSM(object):
                 write_log("STATE: USENOTIFY")
                 self.device.notify_resp = None
                 self.device.expire_time=None
+                bnotify = False
                 if self.device.available_resp and len(self.device.available_resp.profiles)>0:
                     try:
                         _current = self.uci.get('paws', 'ch', 'current')
@@ -184,21 +184,22 @@ class PawsFSM(object):
                                     self.channel_id=self.device.notify_resp.select_channel.channel_id
                                     if isinstance(self.channel_id, basestring):
                                         self.channel_id = int(self.channel_id)
+                                    bnotify = True
                                     self.state = "UCIUPDATE"
                                 else:
                                     write_log("USENOTIFY Instance Failed")
-                                    self.state = "OPERATE"
                             else:
-                                write_log("get Channel class - channel_id select Failed")
-                                self.state = "OPERATE"
+                                write_log("get Channel class - channel_id %d select Failed" % (_current))
                         else:
                             write_log("Channel Arear Failed")
-                            self.state = "OPERATE"
                     except Exception as e:
                         write_log("USENOTIFY ERROR: %s " % e)
-                        self.state = "OPERATE"
                 else:
                     write_log("USENOTIFY ERROR: USE NOT CHANNEL !!")
+                    self.state = "OPERATE"
+                if bnotify == False:
+                    self.uci.set('paws', 'ch', 'current', '0')
+                    self.channel_id = 0
                     self.state = "OPERATE"
 
             # -----------------
@@ -248,8 +249,16 @@ class PawsFSM(object):
     def _is_expired(self):
         if not self.device.expire_time:
             return False
+
         expire = datetime.strptime(
             self.device.expire_time,
             "%Y-%m-%d %H:%M:%S"
         )
-        return datetime.utcnow() >= expire
+
+        now = datetime.utcnow()
+        remaining = (expire - now).total_seconds()
+
+        # 로그 출력 (초 단위)
+        write_log("[DEBUG] expire remaining: {:.2f} seconds".format(remaining))
+
+        return now >= expire
