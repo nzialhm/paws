@@ -1,11 +1,11 @@
 {
-    "timestamp": "2026-04-02 09:44:41", 
+    "timestamp": "2026-04-02 10:39:10", 
     "version": "1.0", 
     "spectrumSchedules": [
         {
             "eventTime": {
-                "stopTime": "2026-04-03 09:44:41", 
-                "startTime": "2026-04-02 09:44:41"
+                "stopTime": "2026-04-03 10:39:10", 
+                "startTime": "2026-04-02 10:39:10"
             }, 
             "spectra": [
                 {

@@ -1,3 +1,6 @@
+# resp.py
+# -*- coding: utf-8 -*-
+
 import json
 import time
 from datetime import datetime
@@ -80,7 +83,7 @@ class resp_handler:
         ret = True
 	#print(json.dumps(js[0]['spectra'][0]['frequencyRanges'],indent=4))
         if len(js[index]['spectra'][0]['frequencyRanges']) > 0:
-            self.bPAWSError = True
+            self.bPAWSError = False
             self.frq_stopHz = js[index]['spectra'][0]['frequencyRanges'][0]['stopHz']
             self.frq_startHz = js[index]['spectra'][0]['frequencyRanges'][0]['startHz']
             self.frq_channelId = js[index]['spectra'][0]['frequencyRanges'][0]['channelId']
@@ -127,7 +130,7 @@ class resp_handler:
         data = json.dumps(active_data, indent=4)
         f.write(data)
         f.close()
-        os.system("nohup python ../check_activate.py KR 1> /dev/null 2>&1 &")
+        # os.system("nohup python ../check_activate.py KR 1> /dev/null 2>&1 &")
 
     def error_resp(self):
         ret = None

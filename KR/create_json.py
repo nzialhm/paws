@@ -1,3 +1,6 @@
+# create_json.py
+# -*- coding: utf-8 -*-
+
 import json
 import collections
 
@@ -167,7 +170,3 @@ class create_json_data:
             
         return ret_js
         
-      
-
-
-

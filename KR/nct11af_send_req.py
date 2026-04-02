@@ -1,3 +1,6 @@
+# nct11af_send_req.py
+# -*- coding: utf-8 -*-
+
 import urllib2
 import ssl # because of python2
 import json
@@ -16,10 +19,10 @@ import subprocess
 #if hasattr(ssl, '_create_unverified_context'):
 #   ssl._create_default_https_context = ssl._create_unverified_context
 
-# path = "/nct11af/script/tvwsDB/KR/"
-path = "D:\\pythonproj\\paws\\KR\\"
-# log_file = "/tmp/paws_log"
-log_file = "paws_log"
+path = "/nct11af/script/tvwsDB/KR/"
+# path = "D:\\pythonproj\\paws\\KR\\"
+log_file = "/tmp/paws_log"
+# log_file = "paws_log"
 #path = "/home/kissvond/work/nct/wsm/buildroot/target/linux/nct11af_imx6ull/def_nct11af/nct11af_bs/nct11af/script/tvwsDB/KR/"
 f_log = open(log_file, "w")
 
@@ -120,13 +123,22 @@ class paws:
             #201204 rogie
             
             try:
-                #os.environ['https_proxy']=''
-                ##self.res_init(None)
-                res = urllib2.urlopen(response,timeout=5)
+                res = urllib2.urlopen(response, timeout=5)
                 chk = True
-            except IOError, e:
-                print("{}".format(e))
-                ret_str = str(e.getcode())
+            except urllib2.HTTPError as e:
+                print("HTTPError:", e.code)
+                self.bPAWSError = True
+                return "HTTP_ERROR"
+
+            except urllib2.URLError as e:
+                print("URLError:", e.reason)
+                self.bPAWSError = True
+                return "URL_ERROR"
+
+            except Exception as e:
+                print("Exception:", e)
+                self.bPAWSError = True
+                return "UNKNOWN_ERROR"
 
             if chk == True:
                 msg = res.read()
@@ -207,31 +219,7 @@ class paws:
                     break;
 
                 self.index += 1
-        # if self.bPAWSError:
-        #     try:
-        #         # 1. 파일 목록 가져오기
-        #         ret = subprocess.check_output(["ls", "/proc/nct11af/"]).decode()
 
-        #         if "nct11af1" in ret:
-        #             print("nct11af1 존재함")
-
-        #             # 2. 인터페이스 상태 확인
-        #             try:
-        #                 subprocess.check_output(["ifconfig", "nct11af1"])
-        #                 print("nct11af1 인터페이스 살아있음")
-
-        #                 # 3. 인터페이스 down
-        #                 subprocess.call(["ifconfig", "nct11af1", "down"])
-        #                 print("nct11af1 down 완료")
-
-        #             except subprocess.CalledProcessError:
-        #                 print("nct11af1 인터페이스 없음 또는 비활성")
-
-        #         else:
-        #             print("nct11af1 없음")
-
-        #     except Exception as e:
-        #         print("에러:", e)
 
 start = "INIT_REQ"
 end = "PAWS_DONE" #SPECTRUM_USE_NOTIFY
@@ -245,26 +233,46 @@ bUseNotify = False
 #end = "PAWS_DONE"#"AVAIL_SPECTRUM_REQ"
 #bUseNotify = True
 
-# if len(sys.argv) > 1:
-#     start = sys.argv[1]
-#     if len(sys.argv) > 2:
-#         end = sys.argv[2]
-#         if len(sys.argv) > 3:
-#             bUseNotify = sys.argv[3]
+if len(sys.argv) > 1:
+    start = sys.argv[1]
+    if len(sys.argv) > 2:
+        end = sys.argv[2]
+        if len(sys.argv) > 3:
+            bUseNotify = sys.argv[3]
 
 
 pw = paws()
 #if pw.doi.select_inq() is True:
 pw.paws_run(start,end,bUseNotify)
+
+if pw.bPAWSError:
+    f_log.write("\n--------------------\ninterface down ")
+    try:
+        # 1. 파일 목록 가져오기
+        ret = subprocess.check_output(["ls", "/proc/nct11af/"]).decode()
+
+        if "nct11af1" in ret:
+            f_log.write("\nnct11af1 exist")
+
+            # 2. 인터페이스 상태 확인
+            try:
+                subprocess.check_output(["ifconfig", "nct11af1"])
+                f_log.write("\nnct11af1 active")
+
+                # 3. 인터페이스 down
+                subprocess.call(["ifconfig", "nct11af1", "down"])
+                f_log.write("\nnct11af1 down")
+
+            except subprocess.CalledProcessError:
+                f_log.write("\nnct11af1 deactive")
+
+        else:
+            f_log.write("\nnct11af1 not exist")
+
+    except Exception as e:
+        f_log.write("\n--------------------\ninterface down exception ")
 #else:
 #print("END")
 #work = Thread(target=pw.paws_run)
 #work.setDaemon(True) #background
 #work.start()
-
-    
-
-
-
-
-
