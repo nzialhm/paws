@@ -1,0 +1,37 @@
+{
+    "timestamp": "2026-04-02 09:44:41", 
+    "version": "1.0", 
+    "spectrumSchedules": [
+        {
+            "eventTime": {
+                "stopTime": "2026-04-03 09:44:41", 
+                "startTime": "2026-04-02 09:44:41"
+            }, 
+            "spectra": [
+                {
+                    "bandwidth": 6, 
+                    "frequencyRanges": [
+                        {
+                            "startHz": 536, 
+                            "channelId": 25, 
+                            "stopHz": 542
+                        }, 
+                        {
+                            "startHz": 578, 
+                            "channelId": 32, 
+                            "stopHz": 584
+                        }
+                    ]
+                }
+            ]
+        }
+    ], 
+    "deviceDesc": {
+        "serealNumber": "WS20-224-0000004", 
+        "modelId": "NZC-WS20", 
+        "ksDeviceType": "Portable Master", 
+        "ksDeviceEmissionPower": 20.0, 
+        "ksCertId": "R-R-nZc-NZC-WS20"
+    }, 
+    "type": "AVAIL_SPECTRUM_RESP"
+}

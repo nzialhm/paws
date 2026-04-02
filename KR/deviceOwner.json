@@ -1,0 +1,20 @@
+{
+    "deviceOwner": {
+        "operator": {
+            "tel": "+82 32 650 5766", 
+            "adr": {
+                "country": "KR", 
+                "region": "South Korea", 
+                "code": "21315", 
+                "street": "bupyungdearo 293", 
+                "locality": "bupyunggu"
+            }, 
+            "email": "welcome@nzia.kr", 
+            "fn": "NZIA"
+        }, 
+        "owner": {
+            "kind": "co", 
+            "fn": "NZIA"
+        }
+    }
+}

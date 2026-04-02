@@ -1,0 +1,35 @@
+{
+	"result":
+		{
+			"type":"AVAIL_SPECTRUM_RESP", 
+			"version":"1.0",
+			"timestamp":"2020-12-04 14:03:51",
+			"deviceDesc": 
+			{
+				"serealNumber":"12345678901214", 
+				"ksCertId":"MSIP-CRM-ABC-12345678901214",
+				"modelId":"xxxxxxxxxxx", 
+				"ksDeviceType":"Fixed Slave", 
+				"ksDeviceEmissionPower":30
+			},
+			"spectrumSchedules":[
+			{
+				"eventTime": 
+				{
+					"startTime":"2020-12-04 14:03:51", 
+					"stopTime":"2020-12-05 14:03:51"
+				},
+				"spectra": [
+				{ 
+					"bandwidth":8,
+					"frequencyRanges":[
+					{"startHz":470, "stopHz": 476, "channelId":21},
+					{"startHz":476,"stopHz": 482, "channelId":55},
+					{"startHz":482, "stopHz":488, "channelId":44},
+					{"startHz": 488, "stopHz":494, "channelId":33}
+					]
+				}]
+			}]
+		},
+	"id":"000002"
+}

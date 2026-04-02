@@ -1,0 +1,10 @@
+{
+    "bandwidth": "6", 
+    "frequencyRanges": [
+        {
+            "startHz": 536, 
+            "channelId": 25, 
+            "stopHz": 542
+        }
+    ]
+}

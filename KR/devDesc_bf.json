@@ -1,0 +1,17 @@
+{
+    "deviceDesc": {
+        "serialNumber": "12345678901214", 
+        "ksDeviceEmissionPower": 21, 
+        "ksCertId": "MSIP-CRM-ABC-12345678901214", 
+        "ksDeviceType": "Fixed Master", 
+        "modelId": "xxxxxxxxxxx"
+    }, 
+    "location": {
+        "point": {
+            "center": {
+                "latitude": 37.53644, 
+                "longitude": 126.95729
+            }
+        }
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "deviceDesc": {
+        "serialNumber": "WS20-224-0000004", 
+        "ksDeviceEmissionPower": 20, 
+        "ksCertId": "R-R-nZc-NZC-WS20", 
+        "ksDeviceType": "Portable Master", 
+        "modelId": "NZC-WS20"
+    }, 
+    "location": {
+        "point": {
+            "center": {
+                "latitude": 37.585999999999999, 
+                "longitude": 126.8172
+            }
+        }
+    }
+}
