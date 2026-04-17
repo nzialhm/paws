@@ -17,6 +17,13 @@ class deviceDesc:
         self.ksDeviceType=uci.get(file, 'dev', 'ksDeviceType')
         self.modelId=uci.get(file, 'dev', 'modelId')
 
+    def set_param(self, _serialNumber, _ksDeviceEmissionPower, _ksCertId, _ksDeviceType, _modelId):
+        self.serialNumber=_serialNumber
+        self.ksDeviceEmissionPower=_ksDeviceEmissionPower
+        self.ksCertId=_ksCertId
+        self.ksDeviceType=_ksDeviceType
+        self.modelId=_modelId
+
     def to_dict(self):
         return {
             "serialNumber": self.serialNumber,
@@ -63,6 +70,36 @@ class location:
             write_log("location uci_load error:: %s" % e)
             return False
 
+    def set_param(self, _lat, _lon):
+        try:
+            lat = _lat
+            lon = _lon
+
+            # None 체크
+            if lat is None or lon is None:
+                return False
+
+            # 문자열 → float 변환
+            lat = float(lat)
+            lon = float(lon)
+
+            # 범위 체크
+            if not (-90.0 <= lat <= 90.0):
+                return False
+
+            if not (-180.0 <= lon <= 180.0):
+                return False
+
+            # 정상일 때만 저장
+            self.latitude = lat
+            self.longitude = lon
+
+            return True
+
+        except Exception as e:
+            write_log("location uci_load error:: %s" % e)
+            return False
+        
     def to_dict(self):
         return {
                 "point": {
@@ -100,6 +137,18 @@ class deviceOwner:
         self.owner_kind = uci.get(file, 'owner', 'owner_kind')
         self.owner_fn = uci.get(file, 'owner', 'owner_fn')
 
+    def set_param(self, _operator_tel, _adr_country, _adr_region, _adr_code, _adr_street, _adr_locality, _operator_email, _operator_fn, _owner_kind, _owner_fn):
+        self.operator_tel = _operator_tel
+        self.adr_country = _adr_country
+        self.adr_region = _adr_region
+        self.adr_code = _adr_code
+        self.adr_street = _adr_street
+        self.adr_locality = _adr_locality
+        self.operator_email = _operator_email
+        self.operator_fn = _operator_fn
+        self.owner_kind = _owner_kind
+        self.owner_fn = _owner_fn
+
     def to_dict(self):
         return {
                 "operator": {
@@ -132,6 +181,10 @@ class antennaCharacteristics:
         self.heightType=uci.get(file, 'dev', 'ant_heightType')
         self.height=uci.get(file, 'dev', 'ant_height')
 
+    def set_param(self, _heightType, _height):
+        self.heightType=_heightType
+        self.height=_height
+
     def to_dict(self):
         return  {
                 "heightType": self.heightType,
@@ -157,6 +210,13 @@ class masterDeviceDesc:
         self.ksDeviceType=uci.get(file, 'dev', 'ksDeviceType')
         self.modelId=uci.get(file, 'dev', 'modelId')
 
+    def set_param(self, _serialNumber, _ksDeviceEmissionPower, _ksCertId, _ksDeviceType, _modelId):
+        self.serialNumber=_serialNumber
+        self.ksDeviceEmissionPower=_ksDeviceEmissionPower
+        self.ksCertId=_ksCertId
+        self.ksDeviceType=_ksDeviceType
+        self.modelId=_modelId
+
     def to_dict(self):
         return  {
                 "serialNumber": self.serialNumber,
@@ -177,6 +237,10 @@ class masterDeviceLocation:
     def uci_load(self, uci, file):
         self.latitude = uci.get(file, 'dev', 'geo_lati')
         self.longitude = uci.get(file, 'dev', 'geo_long')
+
+    def set_param(self, _latitude, _longitude):
+        self.latitude = _latitude
+        self.longitude = _longitude
 
     def to_dict(self):
         return {

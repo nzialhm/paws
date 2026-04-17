@@ -1,6 +1,8 @@
+# slave_device.py
+# -*- coding: utf-8 -*-
 import json
-from typing import List
 import subprocess
+import time
 
 
 class Device:
@@ -17,7 +19,7 @@ class Device:
         self.height = height
 
     @classmethod
-    def from_dict(cls, data: dict):
+    def from_dict(cls, data):
         return cls(
             serial=data.get("serial", ""),
             model=data.get("model", ""),
@@ -31,43 +33,98 @@ class Device:
         )
 
     def __repr__(self):
-        return f"<Device serial={self.serial} ip={self.ip}>"
-
+        return "<Device serial=%s ip=%s>" % (self.serial, self.ip)
 
 
 class DevicesResponse:
-    def __init__(self, devices: List[Device]):
+    def __init__(self, devices):
         self.devices = devices
 
     @classmethod
-    def from_json(cls, json_str: str):
+    def from_json(cls, json_str):
         data = json.loads(json_str)
         devices = [Device.from_dict(d) for d in data.get("devices", [])]
         return cls(devices)
 
-    def get_by_serial(self, serial: str):
-        for d in self.devices:
-            if d.serial == serial:
-                return d
-        return None
-
-    def __repr__(self):
-        return f"<DevicesResponse count={len(self.devices)}>"
-    
+    def to_dict(self):
+        return {d.serial: d for d in self.devices}
 
 
+# 핵심: 감시 클래스
+class DeviceMonitor:
+    def __init__(self):
+        self.current_devices = {}
+        self.bchanged = False
+
+    def fetch_devices(self):
+        try:
+            result = subprocess.check_output(
+                ["ubus", "call", "system_manager", "devices"]
+            )
+        except subprocess.CalledProcessError as e:
+            print("[ERROR] ubus call failed:", e)
+            return None
+
+        json_str = result if isinstance(result, str) else result.decode()
+
+        try:
+            resp = DevicesResponse.from_json(json_str)
+            return resp.to_dict()
+        except Exception as e:
+            print("[ERROR] JSON parsing failed:", e)
+            return None
+
+    def detect_changes(self, _slaves):
+        prev = self.current_devices
+
+        # 신규 device
+        for serial in _slaves:
+            if serial not in prev:
+                self.bchanged = True
+                print("[NEW] %s (%s)" % (serial, _slaves[serial].ip))
+
+        # 삭제된 device
+        for serial in prev:
+            if serial not in _slaves:
+                self.bchanged = True
+                print("[REMOVED] %s (%s)" % (serial, _slaves[serial].ip))
+
+        # 변경 감지 (lat lon 기준 예시)
+        for serial in _slaves:
+            if serial in prev:
+                old = prev[serial]
+                new = _slaves[serial]
+
+                if old.lat != new.lat:
+                    self.bchanged = True
+                    print("[CHANGED] %s lot %s -> %s" %
+                          (serial, old.lat, new.lat))
+                if old.lon != new.lon:
+                    self.bchanged = True
+                    print("[CHANGED] %s lon %s -> %s" %
+                          (serial, old.lon, new.lon))
+
+    def slave_fetch(self):
+        print("[SLAVE] Device Fetch")
+        slaves = self.fetch_devices()
+        if slaves is not None:
+            self.detect_changes(slaves)
+            self.current_devices = slaves
+
+    def run(self):
+        print("[START] Device monitor running...")
+
+        while True:
+            slaves = self.fetch_devices()
+
+            if slaves is not None:
+                self.detect_changes(slaves)
+                self.current_devices = slaves
+
+            time.sleep(5)
+
+
+# 실행
 if __name__ == "__main__":
-    # ubus 호출
-    result = subprocess.check_output(
-        ["ubus", "call", "system_manager", "devices"]
-    )
-
-    json_str = result.decode()
-
-    # 파싱
-    devices_resp = DevicesResponse.from_json(json_str)
-
-    print(devices_resp)
-
-    for d in devices_resp.devices:
-        print(d.serial, d.ip)
+    monitor = DeviceMonitor()
+    monitor.run()

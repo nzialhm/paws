@@ -6,6 +6,7 @@ from datetime import datetime
 from spectrumdb.models import *
 from spectrumdb.req_models import *
 from uciapp_manager import UCIReader
+from slave.slave_device import *
 from log import write_log
 RUN_TIME = 10
 WAITRETRY_TIME = 300
@@ -19,6 +20,7 @@ class PawsFSM(object):
         self.select = "auto"
         self.geo_lati = '0'
         self.geo_long = "0"
+        self.slavedevices = None
 
     def run(self):
         while True:
@@ -241,7 +243,23 @@ class PawsFSM(object):
                             write_log("Spectrum expired request again")
                             self.state = "UCIINIT"
                         time.sleep(RUN_TIME)
-                
+            # -----------------
+            # SLAVELOAD
+            # -----------------
+            elif self.state == "SLAVELOAD":
+                if self.slavedevices == None:
+                    self.slavedevices = DeviceMonitor()
+                self.slavedevices.fetch_devices()
+                if self.next_state != "NONE":
+                    self.state = self.next_state
+                    self.next_state = "NONE"
+                else:
+                    self.state = "OPERATE"
+            # -----------------
+            # SLAVEAVAILABLE
+            # -----------------
+            elif self.state == "SLAVEAVAILABLE":
+                pass    
 
     # -----------------
     # expire check
