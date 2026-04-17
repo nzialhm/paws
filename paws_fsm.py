@@ -21,6 +21,7 @@ class PawsFSM(object):
         self.geo_lati = '0'
         self.geo_long = "0"
         self.slavedevices = None
+        self.next_state = "NONE"
 
     def run(self):
         while True:
