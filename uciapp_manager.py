@@ -5,9 +5,13 @@ import sys
 import os
 import subprocess
 
+PY2 = sys.version_info[0] == 2
+
+
 class UCIReader(object):
     # True | False
     IS_WIN = False
+
     def __init__(self, uci_dir=None):
         """
         :param uci_dir: UCI 파일이 있는 디렉토리
@@ -36,40 +40,26 @@ class UCIReader(object):
 
                 if line.startswith('config '):
                     parts = line.split()
-
                     section_type = parts[1]
 
-                    # section name이 없는 경우 처리
                     if len(parts) > 2:
                         section_name = parts[2].strip("'")
                     else:
-                        # 이름 없으면 type을 이름으로 사용
                         section_name = section_type
 
                     current_section = section_name
                     config[current_section] = {}
-
                     sections_order.append((current_section, raw_line))
 
                 elif line.startswith('option ') and current_section:
                     _, key, value = line.split(' ', 2)
                     value = value.strip("'")
-
-                    # 타입 자동 변환
-                    if value.isdigit():
-                        value = int(value)
-                    else:
-                        try:
-                            value = float(value)
-                        except ValueError:
-                            pass
-
                     config[current_section][key] = value
-
                     sections_order.append((current_section, raw_line))
 
                 else:
                     sections_order.append((None, raw_line))
+
         return config, sections_order
 
     # ---------------- Windows용 파일 저장 ----------------
@@ -77,7 +67,6 @@ class UCIReader(object):
         lines = []
 
         for sec, line in sections_order:
-
             if sec is None:
                 lines.append(line)
                 continue
@@ -118,7 +107,13 @@ class UCIReader(object):
 
             try:
                 result = subprocess.check_output(cmd)
-                return result.decode().strip()
+
+                # Python2/3 안전 처리
+                if isinstance(result, unicode):   # 이미 unicode
+                    return result.strip()
+                else:                             # bytes → utf-8 decode
+                    return result.decode('utf-8', 'replace').strip()
+
             except subprocess.CalledProcessError:
                 return None
 
@@ -127,6 +122,7 @@ class UCIReader(object):
         if self.usewin_config:
             if not self.uci_dir:
                 raise ValueError("Windows 테스트용으로 uci_dir 필요")
+
             file_path = os.path.join(self.uci_dir, config)
             uci_dict, sections_order = self._parse_file(file_path)
 
@@ -138,40 +134,48 @@ class UCIReader(object):
             uci_dict[sec_key][option] = str(value)
             self._write_file(file_path, uci_dict, sections_order)
             return True
+
         else:
-            # OpenWrt uci set + commit
             cmd_set = ['uci']
             if self.uci_dir:
                 cmd_set.extend(['-c', self.uci_dir])
             cmd_set.extend(['set', '{}.{}.{}={}'.format(config, section, option, value)])
+
             try:
                 subprocess.check_call(cmd_set)
-                # commit
+
                 cmd_commit = ['uci']
                 if self.uci_dir:
                     cmd_commit.extend(['-c', self.uci_dir])
                 cmd_commit.extend(['commit', config])
+
                 subprocess.check_call(cmd_commit)
                 return True
+
             except subprocess.CalledProcessError:
                 return False
-                
+
+    # ---------------- show + filter ----------------
     @staticmethod
     def show_and_filter(keyword):
-        if UCIReader.IS_WIN == False:
-            cmd = ['uci']
-            cmd.append('show')
+        if UCIReader.IS_WIN is False:
+            cmd = ['uci', 'show']
 
             try:
-                result = subprocess.check_output(cmd).decode('utf-8', 'replace')
+                result = subprocess.check_output(cmd)
+
+                if PY2:
+                    result = result.decode('utf-8', 'replace')
+
                 lines = result.splitlines()
                 return [line for line in lines if keyword in line]
+
             except subprocess.CalledProcessError:
                 return []
         else:
             return []
 
-                
+
 # ---------------- 사용 예제 ----------------
 if __name__ == "__main__":
     # Windows 테스트용

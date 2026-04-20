@@ -13,19 +13,16 @@ def write_log(msg):
         print(msg)
     else:
         try:
-            # 1. 디렉토리 없으면 생성
             if not os.path.exists(LOG_DIR):
                 os.makedirs(LOG_DIR)
 
-            # 2. 시간 추가
             timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-
             log_path = os.path.join(LOG_DIR, LOG_FILE)
 
-            # 3. 파일 append
             with open(log_path, "a") as f:
+                if isinstance(msg, unicode):
+                    msg = msg.encode('utf-8')
                 f.write("[{}] {}\n".format(timestamp, msg))
 
         except Exception as e:
-            # 로그 실패 시 콘솔 fallback
-            print("LOG ERROR:", e)
+            print("LOG ERROR:", str(e))

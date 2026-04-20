@@ -11,11 +11,11 @@ class deviceDesc:
         self.modelId="NZC-WS20"
 
     def uci_load(self, uci):
-        self.serialNumber=uci.get('system', 'dev', 'serialNumber') or ""
+        self.serialNumber=uci.get('system', 'dev', 'serialNumber') 
         self.ksDeviceEmissionPower = int(uci.get('system', 'dev', 'emissionPower') or 0)
-        self.ksCertId=uci.get('system', 'dev', 'ksCertId') or ""
-        self.ksDeviceType=uci.get('system', 'dev', 'deviceType') or ""
-        self.modelId=uci.get('system', 'dev', 'modelId') or ""
+        self.ksCertId=uci.get('system', 'dev', 'ksCertId') 
+        self.ksDeviceType=uci.get('system', 'dev', 'deviceType') 
+        self.modelId=uci.get('system', 'dev', 'modelId') 
 
     def set_param(self, _serialNumber, _ksDeviceEmissionPower, _ksCertId, _ksDeviceType, _modelId):
         self.serialNumber=_serialNumber
@@ -128,18 +128,18 @@ class deviceOwner:
         self.owner_fn = "NZIA"
     
     def uci_load(self, uci):
-        self.operator_version = uci.get('paws', 'DeviceOwner', 'operator_version') or ""
-        self.operator_tel = uci.get('paws', 'DeviceOwner', 'operator_tel') or ""
-        self.adr_country = uci.get('paws', 'DeviceOwner', 'operator_adr_country') or ""
-        self.adr_region = uci.get('paws', 'DeviceOwner', 'operator_adr_region') or ""
-        self.adr_code = uci.get('paws', 'DeviceOwner', 'operator_adr_code') or ""
-        self.adr_street = uci.get('paws', 'DeviceOwner', 'operator_adr_street') or ""
-        self.adr_locality = uci.get('paws', 'DeviceOwner', 'operator_adr_locality') or ""
-        self.operator_email = uci.get('paws', 'DeviceOwner', 'operator_email') or ""
-        self.operator_fn = uci.get('paws', 'DeviceOwner', 'operator_fn') or ""
-        self.owner_version = uci.get('paws', 'DeviceOwner', 'owner_version') or ""
-        self.owner_kind = uci.get('paws', 'DeviceOwner', 'owner_kind') or ""
-        self.owner_fn = uci.get('paws', 'DeviceOwner', 'owner_fn') or ""
+        self.operator_version = uci.get('paws', 'DeviceOwner', 'operator_version') 
+        self.operator_tel = uci.get('paws', 'DeviceOwner', 'operator_tel') 
+        self.adr_country = uci.get('paws', 'DeviceOwner', 'operator_adr_country') 
+        self.adr_region = uci.get('paws', 'DeviceOwner', 'operator_adr_region') 
+        self.adr_code = uci.get('paws', 'DeviceOwner', 'operator_adr_code') 
+        self.adr_street = uci.get('paws', 'DeviceOwner', 'operator_adr_street') 
+        self.adr_locality = uci.get('paws', 'DeviceOwner', 'operator_adr_locality') 
+        self.operator_email = uci.get('paws', 'DeviceOwner', 'operator_email') 
+        self.operator_fn = uci.get('paws', 'DeviceOwner', 'operator_fn') 
+        self.owner_version = uci.get('paws', 'DeviceOwner', 'owner_version') 
+        self.owner_kind = uci.get('paws', 'DeviceOwner', 'owner_kind') 
+        self.owner_fn = uci.get('paws', 'DeviceOwner', 'owner_fn') 
 
     def set_param(self, _operator_tel, _adr_country, _adr_region, _adr_code, _adr_street, _adr_locality, _operator_email, _operator_fn, _owner_kind, _owner_fn):
         self.operator_tel = _operator_tel
@@ -182,7 +182,7 @@ class antennaCharacteristics:
         self.height=11.0
     
     def uci_load(self, uci):
-        self.heightType=uci.get('paws', 'dev', 'ant_heightType') or ""
+        self.heightType=uci.get('paws', 'dev', 'ant_heightType') 
         self.height = float(uci.get('paws', 'dev', 'ant_height') or 0)
 
     def set_param(self, _heightType, _height):
@@ -208,11 +208,11 @@ class masterDeviceDesc:
         
     
     def uci_load(self, uci):
-        self.serialNumber=uci.get('system', 'dev', 'serialNumber') or ""
+        self.serialNumber=uci.get('system', 'dev', 'serialNumber') 
         self.ksDeviceEmissionPower = int(uci.get('system', 'dev', 'emissionPower') or 0)
-        self.ksCertId=uci.get('system', 'dev', 'ksCertId') or ""
-        self.ksDeviceType=uci.get('system', 'dev', 'deviceType') or ""
-        self.modelId=uci.get('system', 'dev', 'modelId') or ""
+        self.ksCertId=uci.get('system', 'dev', 'ksCertId') 
+        self.ksDeviceType=uci.get('system', 'dev', 'deviceType') 
+        self.modelId=uci.get('system', 'dev', 'modelId') 
 
     def set_param(self, _serialNumber, _ksDeviceEmissionPower, _ksCertId, _ksDeviceType, _modelId):
         self.serialNumber=_serialNumber
