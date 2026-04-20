@@ -133,14 +133,14 @@ class AvailableSpectrumResponse(object):
     def __str__(self):
         return "<SpectrumProfile: type=%s, channel Total %d channels >" % (self.type, len(self.profiles))
 
-    def uci_update(self, uci, file):
+    def uci_update(self, uci):
         channel_ids = []
         channel_count = 0
         for ch in self.profiles:
             channel_ids.append(str(ch.channel_id))
             channel_count = channel_count + 1
-        uci.set(file, 'ch', 'avl_list', ",".join(channel_ids))
-        uci.set(file, 'ch', 'avl_max', str(channel_count))
+        uci.set('paws', 'ch', 'avl_list', ",".join(channel_ids))
+        uci.set('paws', 'ch', 'avl_max', str(channel_count))
 
     def get_Channel(self, channel_id):
         for ch in self.profiles:
@@ -150,9 +150,8 @@ class AvailableSpectrumResponse(object):
 
     @staticmethod
     def uci_init(uci):
-        _respfile = 'paws'
-        uci.set(_respfile, 'ch', 'avl_list', '')
-        uci.set(_respfile, 'ch', 'avl_max', '0')
+        uci.set('paws', 'ch', 'avl_list', '')
+        uci.set('paws', 'ch', 'avl_max', '0')
 
 class AvailableBatchSpectrumResponse(object):
     def __init__(self, result):

@@ -10,16 +10,16 @@ class deviceDesc:
         self.ksDeviceType="Portable Master"
         self.modelId="NZC-WS20"
 
-    def uci_load(self, uci, file):
-        self.serialNumber=uci.get(file, 'dev', 'serialNumber')
-        self.ksDeviceEmissionPower=uci.get(file, 'dev', 'ksDeviceEmissionPower')
-        self.ksCertId=uci.get(file, 'dev', 'ksCertId')
-        self.ksDeviceType=uci.get(file, 'dev', 'ksDeviceType')
-        self.modelId=uci.get(file, 'dev', 'modelId')
+    def uci_load(self, uci):
+        self.serialNumber=uci.get('paws', 'dev', 'serialNumber') or ""
+        self.ksDeviceEmissionPower = int(uci.get('paws', 'dev', 'ksDeviceEmissionPower') or 0)
+        self.ksCertId=uci.get('paws', 'dev', 'ksCertId') or ""
+        self.ksDeviceType=uci.get('paws', 'dev', 'ksDeviceType') or ""
+        self.modelId=uci.get('paws', 'dev', 'modelId') or ""
 
     def set_param(self, _serialNumber, _ksDeviceEmissionPower, _ksCertId, _ksDeviceType, _modelId):
         self.serialNumber=_serialNumber
-        self.ksDeviceEmissionPower=_ksDeviceEmissionPower
+        self.ksDeviceEmissionPower=int(_ksDeviceEmissionPower)
         self.ksCertId=_ksCertId
         self.ksDeviceType=_ksDeviceType
         self.modelId=_modelId
@@ -33,17 +33,17 @@ class deviceDesc:
             "modelId": self.modelId
         }
     def __str__(self):
-        return "<deviceDesc: serialNumber=%s, ksDeviceEmissionPower %d ksCertId %s ksDeviceType %s modelId %s>" % (self.serialNumber, self.ksDeviceEmissionPower, self.ksCertId, self.ksDeviceType, self.modelId)
+        return "<deviceDesc: serialNumber=%s, ksDeviceEmissionPower %s ksCertId %s ksDeviceType %s modelId %s>" % (self.serialNumber, str(self.ksDeviceEmissionPower), self.ksCertId, self.ksDeviceType, self.modelId)
 
 class location:
     def __init__(self):
         self.latitude = 37.4805
         self.longitude = 126.88381
     
-    def uci_load(self, uci, file):
+    def uci_load(self, uci):
         try:
-            lat = uci.get(file, 'dev', 'geo_lati')
-            lon = uci.get(file, 'dev', 'geo_long')
+            lat = uci.get('paws', 'dev', 'geo_lati')
+            lon = uci.get('paws', 'dev', 'geo_long')
 
             # None 체크
             if lat is None or lon is None:
@@ -110,7 +110,7 @@ class location:
                 }
             }
     def __str__(self):
-        return "<location: latitude=%d, longitude %d >" % (self.latitude, self.longitude)
+        return "<location: latitude=%s, longitude %s >" % (str(self.latitude), str(self.longitude))
 
 class deviceOwner:
     def __init__(self):
@@ -125,17 +125,17 @@ class deviceOwner:
         self.owner_kind = "co"
         self.owner_fn = "NZIA"
     
-    def uci_load(self, uci, file):
-        self.operator_tel = uci.get(file, 'owner', 'operator_tel')
-        self.adr_country = uci.get(file, 'owner', 'adr_country')
-        self.adr_region = uci.get(file, 'owner', 'adr_region')
-        self.adr_code = uci.get(file, 'owner', 'adr_code')
-        self.adr_street = uci.get(file, 'owner', 'adr_street')
-        self.adr_locality = uci.get(file, 'owner', 'adr_locality')
-        self.operator_email = uci.get(file, 'owner', 'operator_email')
-        self.operator_fn = uci.get(file, 'owner', 'operator_fn')
-        self.owner_kind = uci.get(file, 'owner', 'owner_kind')
-        self.owner_fn = uci.get(file, 'owner', 'owner_fn')
+    def uci_load(self, uci):
+        self.operator_tel = uci.get('paws', 'owner', 'operator_tel') or ""
+        self.adr_country = uci.get('paws', 'owner', 'adr_country') or ""
+        self.adr_region = uci.get('paws', 'owner', 'adr_region') or ""
+        self.adr_code = uci.get('paws', 'owner', 'adr_code') or ""
+        self.adr_street = uci.get('paws', 'owner', 'adr_street') or ""
+        self.adr_locality = uci.get('paws', 'owner', 'adr_locality') or ""
+        self.operator_email = uci.get('paws', 'owner', 'operator_email') or ""
+        self.operator_fn = uci.get('paws', 'owner', 'operator_fn') or ""
+        self.owner_kind = uci.get('paws', 'owner', 'owner_kind') or ""
+        self.owner_fn = uci.get('paws', 'owner', 'owner_fn') or ""
 
     def set_param(self, _operator_tel, _adr_country, _adr_region, _adr_code, _adr_street, _adr_locality, _operator_email, _operator_fn, _owner_kind, _owner_fn):
         self.operator_tel = _operator_tel
@@ -177,13 +177,13 @@ class antennaCharacteristics:
         self.heightType="AGL"
         self.height=11.0
     
-    def uci_load(self, uci, file):
-        self.heightType=uci.get(file, 'dev', 'ant_heightType')
-        self.height=uci.get(file, 'dev', 'ant_height')
+    def uci_load(self, uci):
+        self.heightType=uci.get('paws', 'dev', 'ant_heightType') or ""
+        self.height = float(uci.get('paws', 'dev', 'ant_height') or 0)
 
     def set_param(self, _heightType, _height):
         self.heightType=_heightType
-        self.height=_height
+        self.height=float(_height)
 
     def to_dict(self):
         return  {
@@ -203,16 +203,16 @@ class masterDeviceDesc:
         self.modelId="NZC-WS20"
         
     
-    def uci_load(self, uci, file):
-        self.serialNumber=uci.get(file, 'dev', 'serialNumber')
-        self.ksDeviceEmissionPower=uci.get(file, 'dev', 'ksDeviceEmissionPower')
-        self.ksCertId=uci.get(file, 'dev', 'ksCertId')
-        self.ksDeviceType=uci.get(file, 'dev', 'ksDeviceType')
-        self.modelId=uci.get(file, 'dev', 'modelId')
+    def uci_load(self, uci):
+        self.serialNumber=uci.get('paws', 'dev', 'serialNumber') or ""
+        self.ksDeviceEmissionPower = int(uci.get('paws', 'dev', 'ksDeviceEmissionPower') or 0)
+        self.ksCertId=uci.get('paws', 'dev', 'ksCertId') or ""
+        self.ksDeviceType=uci.get('paws', 'dev', 'ksDeviceType') or ""
+        self.modelId=uci.get('paws', 'dev', 'modelId') or ""
 
     def set_param(self, _serialNumber, _ksDeviceEmissionPower, _ksCertId, _ksDeviceType, _modelId):
         self.serialNumber=_serialNumber
-        self.ksDeviceEmissionPower=_ksDeviceEmissionPower
+        self.ksDeviceEmissionPower=int(_ksDeviceEmissionPower)
         self.ksCertId=_ksCertId
         self.ksDeviceType=_ksDeviceType
         self.modelId=_modelId
@@ -227,20 +227,23 @@ class masterDeviceDesc:
             }
 
     def __str__(self):
-        return "<masterDeviceDesc: serialNumber=%s, ksDeviceEmissionPower %d ksCertId %s ksDeviceType %s modelId %s>" % (self.serialNumber, self.ksDeviceEmissionPower, self.ksCertId, self.ksDeviceType, self.modelId)
+        return "<masterDeviceDesc: serialNumber=%s, ksDeviceEmissionPower %s ksCertId %s ksDeviceType %s modelId %s>" % (self.serialNumber, str(self.ksDeviceEmissionPower), self.ksCertId, self.ksDeviceType, self.modelId)
 
 class masterDeviceLocation:
     def __init__(self):
         self.latitude = 37.586
         self.longitude = 126.8172
     
-    def uci_load(self, uci, file):
-        self.latitude = uci.get(file, 'dev', 'geo_lati')
-        self.longitude = uci.get(file, 'dev', 'geo_long')
+    def uci_load(self, uci):
+        lat = float(uci.get('paws', 'dev', 'geo_lati') or 0)
+        lon = float(uci.get('paws', 'dev', 'geo_long') or 0)
+
+        self.latitude = lat
+        self.longitude = lon
 
     def set_param(self, _latitude, _longitude):
-        self.latitude = _latitude
-        self.longitude = _longitude
+        self.latitude = float(_latitude)
+        self.longitude = float(_longitude)
 
     def to_dict(self):
         return {
@@ -253,7 +256,7 @@ class masterDeviceLocation:
             }
 
     def __str__(self):
-        return "<masterDeviceLocation: latitude=%s, longitude %s >" % (self.latitude, self.longitude)
+        return "<masterDeviceLocation: latitude=%s, longitude %s >" % (str(self.latitude), str(self.longitude))
 
 class spectra:
     def __init__(self):
@@ -265,8 +268,8 @@ class spectra:
         frequencyRanges_0["channelId"] = 0
         self.frequencyRanges.append(frequencyRanges_0)
 
-    def uci_update(self, uci, file):
-        uci.set(file, 'ch', 'current', str(self.frequencyRanges[0]["channelId"]))
+    def uci_update(self, uci):
+        uci.set('paws', 'ch', 'current', str(self.frequencyRanges[0]["channelId"]))
 
     def init_channelinfo(self):
         self.bandwidth = 6
@@ -276,14 +279,13 @@ class spectra:
 
     @staticmethod
     def uci_init(uci):
-        _respfile = 'paws'
-        uci.set(_respfile, 'ch', 'current', '0')
+        uci.set('paws', 'ch', 'current', '0')
 
     def set_channelinfo(self, channel):
-        self.bandwidth = channel.bandwidth
-        self.frequencyRanges[0]["startHz"] = channel.start_hz
-        self.frequencyRanges[0]["stopHz"] = channel.stop_hz
-        self.frequencyRanges[0]["channelId"] = channel.channel_id
+        self.bandwidth = int(channel.bandwidth)
+        self.frequencyRanges[0]["startHz"] = int(channel.start_hz)
+        self.frequencyRanges[0]["stopHz"] = int(channel.stop_hz)
+        self.frequencyRanges[0]["channelId"] = int(channel.channel_id)
 
     def to_dict(self):
         return  {
@@ -292,4 +294,4 @@ class spectra:
             }
 
     def __str__(self):
-        return "<masterDeviceLocation: bandwidth=%d, startHz %d stopHz %d channelId %d>" % (self.bandwidth, self.frequencyRanges[0]["startHz"] , self.frequencyRanges[0]["stopHz"] , self.frequencyRanges[0]["channelId"] )
+        return "<masterDeviceLocation: bandwidth=%s, startHz %s stopHz %s channelId %s>" % (str(self.bandwidth), str(self.frequencyRanges[0]["startHz"]) , str(self.frequencyRanges[0]["stopHz"]) , str(self.frequencyRanges[0]["channelId"]) )

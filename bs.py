@@ -26,22 +26,20 @@ class BS(BaseDevice):
         self.notify_resp = None
 
     def uci_load(self, uci):
-        _reqfile = 'paws'
-        self._deviceDesc.uci_load(uci, _reqfile)
+        self._deviceDesc.uci_load(uci)
         write_log(self._deviceDesc)
-        self.blocationcheck = self._location.uci_load(uci, _reqfile)
+        self.blocationcheck = self._location.uci_load(uci)
         write_log(self._location)
-        self._masterDeviceDesc.uci_load(uci, _reqfile)
+        self._masterDeviceDesc.uci_load(uci)
         write_log(self._masterDeviceDesc)
-        self._masterDeviceLocation.uci_load(uci, _reqfile)
+        self._masterDeviceLocation.uci_load(uci)
         write_log(self._masterDeviceLocation)
-        self._deviceOwner.uci_load(uci, _reqfile)
+        self._deviceOwner.uci_load(uci)
         write_log(self._deviceOwner)
-        self._antennaCharacteristics.uci_load(uci, _reqfile)
+        self._antennaCharacteristics.uci_load(uci)
         write_log(self._antennaCharacteristics)
 
     def uci_update(self, uci):
-        _respfile = 'paws'
         if not self.available_resp == None:
-            self.available_resp.uci_update(uci, _respfile)
-        self._spectra.uci_update(uci, _respfile)
+            self.available_resp.uci_update(uci)
+        self._spectra.uci_update(uci)
