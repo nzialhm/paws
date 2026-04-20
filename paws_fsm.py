@@ -18,8 +18,8 @@ class PawsFSM(object):
         self.state = "UCIINIT"
         self.uci = uci
         self.select = "auto"
-        self.geo_lati = '0'
-        self.geo_long = "0"
+        self.lati = '0'
+        self.long = "0"
         self.slavedevices = None
         self.next_state = "NONE"
 
@@ -43,8 +43,8 @@ class PawsFSM(object):
                 self.channel_id = self.uci.get('paws', 'ch', 'current')
                 if isinstance(self.channel_id, basestring):
                     self.channel_id = int(self.channel_id)
-                self.geo_lati = self.uci.get('paws', 'dev', 'geo_lati')
-                self.geo_long = self.uci.get('paws', 'dev', 'geo_long')
+                self.lati = self.uci.get('paws', 'global', 'lati')
+                self.long = self.uci.get('paws', 'global', 'long')
                 self.device.uci_load(self.uci)
                 if self.device.blocationcheck:
                     self.state = "INIT"
@@ -61,7 +61,7 @@ class PawsFSM(object):
                 while True:
                     _retrytime = WAITRETRY_TIME
                     if(loop < _retrytime):
-                        write_log("retrytime - real %d setting %d " % (loop, _retrytime))
+                        write_log("retrytime - real %s setting %s " % (str(loop), str(_retrytime)))
                         loop = loop + looptime
                         time.sleep(looptime)
                     else:
@@ -89,7 +89,7 @@ class PawsFSM(object):
                         write_log("INIT Failed")
                         self.state = "WAITRETRY"
                 except Exception as e:
-                    write_log("INIT ERROR: %s" % e)
+                    write_log("INIT ERROR: %s" % str(e))
                     self.state = "WAITRETRY"
             # -----------------
             # REGISTER
@@ -106,7 +106,7 @@ class PawsFSM(object):
                         write_log("REGISTER Failed")
                         self.state = "WAITRETRY"
                 except Exception as e:
-                    write_log("REGISTER ERROR: %s" % e)
+                    write_log("REGISTER ERROR: %s" % str(e))
                     self.state = "WAITRETRY"
             # -----------------
             # AVAILABLE
@@ -134,7 +134,7 @@ class PawsFSM(object):
                         write_log("AVAILABLE Failed")
                         self.state = "WAITRETRY"
                 except Exception as e:
-                    write_log("AVAILABLE ERROR: %s" % e)
+                    write_log("AVAILABLE ERROR: %s" % str(e))
                     self.state = "WAITRETRY"
             # -----------------
             # AVAILABLE BATCH
@@ -159,7 +159,7 @@ class PawsFSM(object):
                         write_log("AVAILABLEBATCH Failed")
                         self.state = "WAITRETRY"
                 except Exception as e:
-                    write_log("AVAILABLEBATCH ERROR: %s" % e)
+                    write_log("AVAILABLEBATCH ERROR: %s" % str(e))
                     self.state = "WAITRETRY"
                 
             # -----------------
@@ -192,11 +192,11 @@ class PawsFSM(object):
                                 else:
                                     write_log("USENOTIFY Instance Failed")
                             else:
-                                write_log("get Channel class - channel_id %d select Failed" % (_current))
+                                write_log("get Channel class - channel_id %s select Failed" % (str(_current)))
                         else:
                             write_log("Channel Arear Failed")
                     except Exception as e:
-                        write_log("USENOTIFY ERROR: %s " % e)
+                        write_log("USENOTIFY ERROR: %s " % str(e))
                 else:
                     write_log("USENOTIFY ERROR: USE NOT CHANNEL !!")
                     self.state = "OPERATE"
@@ -220,22 +220,22 @@ class PawsFSM(object):
             # -----------------
             elif self.state == "OPERATE":
                 write_log("STATE: OPERATE")
-                _reload = self.uci.get('paws', 'global', 'reload')
-                if _reload == 'y':
-                    self.uci.set('paws', 'global', 'reload', 'n')
-                    write_log("reload - paws again!!")
+                _testmode = self.uci.get('paws', 'global', 'testmode')
+                if _testmode == 'y':
+                    self.uci.set('paws', 'global', 'testmode', 'n')
+                    write_log("testmode - paws again!!")
                     self.state = "UCIINIT"
                 else:
                     _current = self.uci.get('paws', 'ch', 'current')
-                    _geo_lati = self.uci.get('paws', 'dev', 'geo_lati')
-                    _geo_long = self.uci.get('paws', 'dev', 'geo_long')
+                    _lati = self.uci.get('paws', 'global', 'lati')
+                    _long = self.uci.get('paws', 'global', 'long')
                     if isinstance(_current, basestring):
                         _current = int(_current)
-                        write_log("current channel: %d" % _current)
-                    write_log("OPERATE -> geo_lati : uci %s cur %s" % (_geo_lati, self.geo_lati))
-                    write_log("OPERATE -> geo_long : uci %s cur %s" % (_geo_long, self.geo_long))
-                    write_log("OPERATE -> channel_id : uci %d cur %d" % (_current, self.channel_id))
-                    if _geo_lati != self.geo_lati and _geo_long != self.geo_long:
+                        write_log("current channel: %s" % str(_current))
+                    write_log("OPERATE -> lati : uci %s cur %s" % (str(_lati), str(self.lati)))
+                    write_log("OPERATE -> long : uci %s cur %s" % (str(_long), str(self.long)))
+                    write_log("OPERATE -> channel_id : uci %s cur %s" % (str(_current), str(self.channel_id)))
+                    if _lati != self.lati and _long != self.long:
                         self.state = "UCIINIT"
                     elif (_current>=14 and _current<=51) and _current != self.channel_id:
                         self.state = "USENOTIFY"

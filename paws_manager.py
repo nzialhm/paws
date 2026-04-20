@@ -15,15 +15,15 @@ def main():
     # uci = UCIReader(uci_dir='/etc/config')
     _use = uci.get('paws', 'global', 'use')
     if _use == 'y':
-        _devicetype = uci.get('paws', 'dev', 'ksDeviceType')
+        _ksDeviceType = uci.get('system', 'dev', 'deviceType')
         _serverurl = uci.get('paws', 'global', 'serverurl')
-        if _devicetype == "Portable Master" or _devicetype == "Fixed Master":
+        if _ksDeviceType == "Portable Master" or _ksDeviceType == "Fixed Master":
             db = SpectrumDB(_serverurl)
-            device = BS(_devicetype, db)
+            device = BS(_ksDeviceType, db)
             fsm = PawsFSM(device, uci)
             fsm.run()
         else:
-            device = CPE(_devicetype, uci)
+            device = CPE(_ksDeviceType, uci)
             device.run()
     else:
         write_log("paws process end!")

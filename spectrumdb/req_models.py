@@ -11,11 +11,11 @@ class deviceDesc:
         self.modelId="NZC-WS20"
 
     def uci_load(self, uci):
-        self.serialNumber=uci.get('paws', 'dev', 'serialNumber') or ""
-        self.ksDeviceEmissionPower = int(uci.get('paws', 'dev', 'ksDeviceEmissionPower') or 0)
-        self.ksCertId=uci.get('paws', 'dev', 'ksCertId') or ""
-        self.ksDeviceType=uci.get('paws', 'dev', 'ksDeviceType') or ""
-        self.modelId=uci.get('paws', 'dev', 'modelId') or ""
+        self.serialNumber=uci.get('system', 'dev', 'serialNumber') or ""
+        self.ksDeviceEmissionPower = int(uci.get('system', 'dev', 'emissionPower') or 0)
+        self.ksCertId=uci.get('system', 'dev', 'ksCertId') or ""
+        self.ksDeviceType=uci.get('system', 'dev', 'deviceType') or ""
+        self.modelId=uci.get('system', 'dev', 'modelId') or ""
 
     def set_param(self, _serialNumber, _ksDeviceEmissionPower, _ksCertId, _ksDeviceType, _modelId):
         self.serialNumber=_serialNumber
@@ -42,8 +42,8 @@ class location:
     
     def uci_load(self, uci):
         try:
-            lat = uci.get('paws', 'dev', 'geo_lati')
-            lon = uci.get('paws', 'dev', 'geo_long')
+            lat = uci.get('paws', 'global', 'lati')
+            lon = uci.get('paws', 'global', 'long')
 
             # None 체크
             if lat is None or lon is None:
@@ -67,7 +67,7 @@ class location:
             return True
 
         except Exception as e:
-            write_log("location uci_load error:: %s" % e)
+            write_log("location uci_load error:: %s" % str(e))
             return False
 
     def set_param(self, _lat, _lon):
@@ -97,7 +97,7 @@ class location:
             return True
 
         except Exception as e:
-            write_log("location uci_load error:: %s" % e)
+            write_log("location uci_load error:: %s" % str(e))
             return False
         
     def to_dict(self):
@@ -114,6 +114,7 @@ class location:
 
 class deviceOwner:
     def __init__(self):
+        self.operator_version = "4.0"
         self.operator_tel = "+82 851 3872"
         self.adr_country = "KR"
         self.adr_region = "South Korea"
@@ -122,20 +123,23 @@ class deviceOwner:
         self.adr_locality = "Geumcheon-gu"
         self.operator_email = "info@nzia.kr"
         self.operator_fn = "NZIA"
+        self.owner_version = "4.0"
         self.owner_kind = "co"
         self.owner_fn = "NZIA"
     
     def uci_load(self, uci):
-        self.operator_tel = uci.get('paws', 'owner', 'operator_tel') or ""
-        self.adr_country = uci.get('paws', 'owner', 'adr_country') or ""
-        self.adr_region = uci.get('paws', 'owner', 'adr_region') or ""
-        self.adr_code = uci.get('paws', 'owner', 'adr_code') or ""
-        self.adr_street = uci.get('paws', 'owner', 'adr_street') or ""
-        self.adr_locality = uci.get('paws', 'owner', 'adr_locality') or ""
-        self.operator_email = uci.get('paws', 'owner', 'operator_email') or ""
-        self.operator_fn = uci.get('paws', 'owner', 'operator_fn') or ""
-        self.owner_kind = uci.get('paws', 'owner', 'owner_kind') or ""
-        self.owner_fn = uci.get('paws', 'owner', 'owner_fn') or ""
+        self.operator_version = uci.get('paws', 'DeviceOwner', 'operator_version') or ""
+        self.operator_tel = uci.get('paws', 'DeviceOwner', 'operator_tel') or ""
+        self.adr_country = uci.get('paws', 'DeviceOwner', 'operator_adr_country') or ""
+        self.adr_region = uci.get('paws', 'DeviceOwner', 'operator_adr_region') or ""
+        self.adr_code = uci.get('paws', 'DeviceOwner', 'operator_adr_code') or ""
+        self.adr_street = uci.get('paws', 'DeviceOwner', 'operator_adr_street') or ""
+        self.adr_locality = uci.get('paws', 'DeviceOwner', 'operator_adr_locality') or ""
+        self.operator_email = uci.get('paws', 'DeviceOwner', 'operator_email') or ""
+        self.operator_fn = uci.get('paws', 'DeviceOwner', 'operator_fn') or ""
+        self.owner_version = uci.get('paws', 'DeviceOwner', 'owner_version') or ""
+        self.owner_kind = uci.get('paws', 'DeviceOwner', 'owner_kind') or ""
+        self.owner_fn = uci.get('paws', 'DeviceOwner', 'owner_fn') or ""
 
     def set_param(self, _operator_tel, _adr_country, _adr_region, _adr_code, _adr_street, _adr_locality, _operator_email, _operator_fn, _owner_kind, _owner_fn):
         self.operator_tel = _operator_tel
@@ -204,11 +208,11 @@ class masterDeviceDesc:
         
     
     def uci_load(self, uci):
-        self.serialNumber=uci.get('paws', 'dev', 'serialNumber') or ""
-        self.ksDeviceEmissionPower = int(uci.get('paws', 'dev', 'ksDeviceEmissionPower') or 0)
-        self.ksCertId=uci.get('paws', 'dev', 'ksCertId') or ""
-        self.ksDeviceType=uci.get('paws', 'dev', 'ksDeviceType') or ""
-        self.modelId=uci.get('paws', 'dev', 'modelId') or ""
+        self.serialNumber=uci.get('system', 'dev', 'serialNumber') or ""
+        self.ksDeviceEmissionPower = int(uci.get('system', 'dev', 'emissionPower') or 0)
+        self.ksCertId=uci.get('system', 'dev', 'ksCertId') or ""
+        self.ksDeviceType=uci.get('system', 'dev', 'deviceType') or ""
+        self.modelId=uci.get('system', 'dev', 'modelId') or ""
 
     def set_param(self, _serialNumber, _ksDeviceEmissionPower, _ksCertId, _ksDeviceType, _modelId):
         self.serialNumber=_serialNumber
@@ -235,8 +239,8 @@ class masterDeviceLocation:
         self.longitude = 126.8172
     
     def uci_load(self, uci):
-        lat = float(uci.get('paws', 'dev', 'geo_lati') or 0)
-        lon = float(uci.get('paws', 'dev', 'geo_long') or 0)
+        lat = float(uci.get('paws', 'global', 'lati') or 0)
+        lon = float(uci.get('paws', 'global', 'long') or 0)
 
         self.latitude = lat
         self.longitude = lon

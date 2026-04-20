@@ -35,9 +35,16 @@ class UCIReader(object):
                     continue
 
                 if line.startswith('config '):
-                    parts = line.split(' ')
+                    parts = line.split()
+
                     section_type = parts[1]
-                    section_name = parts[2].strip("'")
+
+                    # section name이 없는 경우 처리
+                    if len(parts) > 2:
+                        section_name = parts[2].strip("'")
+                    else:
+                        # 이름 없으면 type을 이름으로 사용
+                        section_name = section_type
 
                     current_section = section_name
                     config[current_section] = {}
