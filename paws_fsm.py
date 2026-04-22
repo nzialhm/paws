@@ -22,6 +22,7 @@ class PawsFSM(object):
         self.long = "0"
         self.slavedevices = None
         self.next_state = "NONE"
+        self.monitor = DeviceMonitor()
 
     def run(self):
         while True:
@@ -243,25 +244,48 @@ class PawsFSM(object):
                         if self._is_expired():
                             write_log("Spectrum expired request again")
                             self.state = "UCIINIT"
+                        else:
+                            self.monitor.slave_fetch()
+                            if self.monitor.bchangnew:
+                                self.monitor.bchangnew = False
+                                self.state = "SLAVEPAWS"
                         time.sleep(RUN_TIME)
-            # -----------------
-            # SLAVELOAD
-            # -----------------
-            elif self.state == "SLAVELOAD":
-                if self.slavedevices == None:
-                    self.slavedevices = DeviceMonitor()
-                self.slavedevices.fetch_devices()
-                if self.next_state != "NONE":
-                    self.state = self.next_state
-                    self.next_state = "NONE"
-                else:
-                    self.state = "OPERATE"
-            # -----------------
-            # SLAVEAVAILABLE
-            # -----------------
-            elif self.state == "SLAVEAVAILABLE":
-                pass    
 
+            # -----------------
+            # SLAVEPAWS AVAILABLE + USENOTIFY
+            # -----------------
+            elif self.state == "SLAVEPAWS":
+                write_log("STATE: SLAVEPAWS")
+                self.monitor.slave_fetch()
+                slavedevices = self.monitor.get_slavedevice() or {}
+                for serial, dev in slavedevices.items():
+                    print("DEVICE: %s" % serial)
+                    try:
+                        desc, loc, ant = dev.to_req_models()
+                        write_log("STATE: SLAVE AVAILABLE")
+                        slave_available_resp = self.device.db.slaveavail_req(self.device, desc, loc, ant)
+                        if isinstance(slave_available_resp, AvailableSpectrumResponse):
+                            write_log(slave_available_resp)
+                            size = len(slave_available_resp.profiles)
+                            if size > 0 and (self.channel_id >= 14 and self.channel_id <= 51):
+                                slave_channel = slave_available_resp.get_Channel(self.channel_id)
+                                if slave_channel != None:
+                                    slave_spectra = spectra()
+                                    slave_spectra.set_channelinfo(slave_channel)
+                                    write_log("STATE: SLAVE USENOTIFY")
+                                    slave_notify_resp = self.device.db.slavenotify_req(self.device, desc, loc, ant, slave_spectra)
+                                    if isinstance(slave_notify_resp, NotifyResponse):
+                                        write_log(slave_notify_resp)
+                                    else:
+                                        write_log("Slave USENOTIFY Instance Failed")
+                                else:
+                                    write_log("Slave Find Channel Class Failed : master channel id %s " % (str(self.channel_id)))
+                            else:
+                                write_log("Slave AVAILABLESPECTRUM Instance Failed")
+                    except Exception as e:
+                        write_log("Slave Device processing error: %s" % str(e))
+                
+                self.state = "OPERATE"
     # -----------------
     # expire check
     # -----------------

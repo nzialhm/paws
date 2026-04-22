@@ -124,6 +124,27 @@ class SpectrumDB(object):
         return SpectrumDBResponseParser.parse_available(resp)
 
     # -------------------------
+    # AVAILABLE Slave
+    # -------------------------
+
+    def slaveavail_req(self, device, _deviceDesc, _location, _antennaCharacteristics):
+        payload = {
+            "version": str(device.version),
+            "type": "AVAIL_SPECTRUM_REQ",
+            "deviceDesc": _deviceDesc.to_dict(),
+            "location": _location.to_dict(),
+            "masterDeviceDesc": device._masterDeviceDesc.to_dict(),
+            "masterDeviceLocation": device._masterDeviceLocation.to_dict(),
+            "deviceOwner": device._deviceOwner.to_dict(),
+            "antennaCharacteristics": _antennaCharacteristics.to_dict()
+        }
+        resp = self._post(
+            "spectrum.paws.getSpectrum",
+            payload
+        )
+        return SpectrumDBResponseParser.parse_available(resp)
+
+    # -------------------------
     # AVAILABLE BATCH
     # -------------------------
 
@@ -158,6 +179,27 @@ class SpectrumDB(object):
                 "masterDeviceDesc": device._masterDeviceDesc.to_dict(),
                 "masterDeviceLocation": device._masterDeviceLocation.to_dict(),
                 "spectra": device._spectra.to_dict()
+            }
+        resp = self._post(
+            "spectrum.paws.notifySpectrumUse",
+            payload
+        )
+        return SpectrumDBResponseParser.parse_notify(resp, device.channel)
+    
+    # -------------------------
+    # USE NOTIFY Slave
+    # -------------------------
+
+    def slavenotify_req(self, device, _deviceDesc, _location, _antennaCharacteristics, _spectra):
+        payload = {
+                "version": str(device.version),
+                "type": "SPECTRUM_USE_NOTIFY",
+                "deviceDesc": _deviceDesc.to_dict(),
+                "location": _location.to_dict(),
+                "antennaCharacteristics": _antennaCharacteristics.to_dict(),
+                "masterDeviceDesc": device._masterDeviceDesc.to_dict(),
+                "masterDeviceLocation": device._masterDeviceLocation.to_dict(),
+                "spectra": _spectra.to_dict()
             }
         resp = self._post(
             "spectrum.paws.notifySpectrumUse",
