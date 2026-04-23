@@ -1,5 +1,4 @@
 config system
-	option hostname 'NZIA'
 	option zonename 'Asia/Seoul'
 	option timezone 'KST-9'
 	option ttylogin '0'
@@ -15,12 +14,14 @@ config system
 	option alg_mode 'OFB'
 	option KEK 'NZIA'
 	option battery_model 'N'
+	option serialnum 'WS20-259-0000001'
+	option hostname 'NZC-WS20'
 
 config paws 'dev'
 	option serialNumber 'WS20-224-0000004'
 	option modelId 'NZC-WS20'
 	option ksCertId 'R-R-nZc-NZC-WS20'
-	option deviceType 'Portable Master'
+	option deviceType 'Fixed Master'
 	option emissionPower '20'
 
 config timeserver 'ntp'

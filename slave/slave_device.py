@@ -3,12 +3,14 @@
 import json
 import subprocess
 import time
+from spectrumdb.models import *
 from spectrumdb.req_models import *
+from log import write_log
 
 
 class Device:
     def __init__(self, serial, model_id, power, cert_id, dev_type,
-                 ip, lat, lon, height_type, height):
+                 ip, lat, lon, height_type, height, pawsnew):
         self.serial = serial
         self.model_id = model_id
         self.cert_id = cert_id
@@ -19,6 +21,8 @@ class Device:
         self.lon = lon
         self.height_type = height_type
         self.height = height
+        self.pawsnew = pawsnew
+        self.channel_id = None
 
     @classmethod
     def from_dict(cls, data):
@@ -29,10 +33,11 @@ class Device:
             cert_id=data.get("cert_id", ""),
             dev_type=data.get("type", ""),
             ip=data.get("ip", ""),
-            lat=data.get("lat", 0.0),
-            lon=data.get("lon", 0.0),
+            lat=data.get("lat", "0.0"),
+            lon=data.get("lon", "0.0"),
             height_type=data.get("height_type", ""),
-            height=data.get("height", 0.0),
+            height=data.get("height", "0.0"),
+            pawsnew=data.get("pawsnew", 0),
         )
 
     def __repr__(self):
@@ -95,8 +100,6 @@ class DeviceMonitor:
     def __init__(self):
         self.current_devices = {}
         self.bchanged = False
-        self.bchangnew = False
-        self.bchangrm = False
 
     def fetch_devices(self):
         try:
@@ -104,7 +107,7 @@ class DeviceMonitor:
                 ["ubus", "call", "system_manager", "devices"]
             )
         except subprocess.CalledProcessError as e:
-            print("[ERROR] ubus call failed:", e)
+            write_log("[ERROR] ubus call failed: %s" % str(e))
             return None
 
         json_str = result if isinstance(result, str) else result.decode()
@@ -113,7 +116,26 @@ class DeviceMonitor:
             resp = DevicesResponse.from_json(json_str)
             return resp.to_dict()
         except Exception as e:
-            print("[ERROR] JSON parsing failed:", e)
+            write_log("[ERROR] JSON parsing failed: %s" % str(e))
+            return None
+        
+    def ubus_devicechannel(self, serial, channel_id, pawsnew):
+        try:
+            payload = {
+                "serial": serial,
+                "channel": channel_id,
+                "pawsnew": pawsnew
+            }
+
+            result = subprocess.check_output(
+                ["ubus", "call", "system_manager", "slavechannel", json.dumps(payload)],
+                stderr=subprocess.STDOUT
+            )
+
+            return result.decode()
+
+        except subprocess.CalledProcessError as e:
+            write_log("[ERROR] ubus call failed: %s" % str(e.output.decode()))
             return None
 
     def detect_changes(self, _slaves):
@@ -121,15 +143,11 @@ class DeviceMonitor:
 
         for serial in _slaves:
             if serial not in prev:
-                self.bchanged = True
-                self.bchangnew = True
-                print("[NEW] %s (%s)" % (serial, _slaves[serial].ip))
+                write_log("[NEW] %s (%s)" % (str(serial), str(_slaves[serial].ip)))
 
         for serial in prev:
             if serial not in _slaves:
-                self.bchanged = True
-                self.bchangrm = True
-                print("[REMOVED] %s (%s)" % (serial, prev[serial].ip))
+                write_log("[REMOVED] %s (%s)" % (str(serial), str(prev[serial].ip)))
 
         for serial in _slaves:
             if serial in prev:
@@ -138,15 +156,19 @@ class DeviceMonitor:
 
                 if old.lat != new.lat:
                     self.bchanged = True
-                    print("[CHANGED] %s lat %s -> %s" %
-                          (serial, old.lat, new.lat))
+                    write_log("[CHANGED] %s lat %s -> %s" %
+                          (str(serial), str(old.lat), str(new.lat)))
                 if old.lon != new.lon:
                     self.bchanged = True
-                    print("[CHANGED] %s lon %s -> %s" %
-                          (serial, old.lon, new.lon))
+                    write_log("[CHANGED] %s lon %s -> %s" %
+                          (str(serial), str(old.lon), str(new.lon)))
+                    
+            if _slaves[serial].pawsnew == 1:
+                self.bchanged = True
+                write_log("[PAWSNEW] slave paws start !!")
 
     def slave_fetch(self):
-        print("[SLAVE] Device Fetch")
+        write_log("[SLAVE] Device Fetch")
         slaves = self.fetch_devices()
         if slaves is not None:
             self.detect_changes(slaves)
@@ -163,7 +185,7 @@ class DeviceMonitor:
             devices = self.get_slavedevice() or {}
 
             for serial, dev in devices.items():
-                print("DEVICE: %s" % serial)
+                print("DEVICE: %s" % str(serial))
 
                 try:
                     desc, loc, ant = dev.to_req_models()

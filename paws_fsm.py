@@ -246,8 +246,8 @@ class PawsFSM(object):
                             self.state = "UCIINIT"
                         else:
                             self.monitor.slave_fetch()
-                            if self.monitor.bchangnew:
-                                self.monitor.bchangnew = False
+                            if self.monitor.bchanged:
+                                self.monitor.bchanged = False
                                 self.state = "SLAVEPAWS"
                         time.sleep(RUN_TIME)
 
@@ -258,24 +258,30 @@ class PawsFSM(object):
                 write_log("STATE: SLAVEPAWS")
                 self.monitor.slave_fetch()
                 slavedevices = self.monitor.get_slavedevice() or {}
-                for serial, dev in slavedevices.items():
-                    print("DEVICE: %s" % serial)
+                for serial, slavedev in slavedevices.items():
+                    write_log("DEVICE: %s" % str(serial))
+                    if slavedev.pawsnew == 0:
+                        continue
+                    else:
+                        slavedev.pawsnew = 0
                     try:
-                        desc, loc, ant = dev.to_req_models()
+                        desc, loc, ant = slavedev.to_req_models()
                         write_log("STATE: SLAVE AVAILABLE")
-                        slave_available_resp = self.device.db.slaveavail_req(self.device, desc, loc, ant)
-                        if isinstance(slave_available_resp, AvailableSpectrumResponse):
-                            write_log(slave_available_resp)
-                            size = len(slave_available_resp.profiles)
+                        slavedev_available_resp = self.device.db.slaveavail_req(self.device, desc, loc, ant)
+                        if isinstance(slavedev_available_resp, AvailableSpectrumResponse):
+                            write_log(slavedev_available_resp)
+                            size = len(slavedev_available_resp.profiles)
                             if size > 0 and (self.channel_id >= 14 and self.channel_id <= 51):
-                                slave_channel = slave_available_resp.get_Channel(self.channel_id)
+                                slave_channel = slavedev_available_resp.get_Channel(self.channel_id)
                                 if slave_channel != None:
                                     slave_spectra = spectra()
                                     slave_spectra.set_channelinfo(slave_channel)
                                     write_log("STATE: SLAVE USENOTIFY")
-                                    slave_notify_resp = self.device.db.slavenotify_req(self.device, desc, loc, ant, slave_spectra)
-                                    if isinstance(slave_notify_resp, NotifyResponse):
-                                        write_log(slave_notify_resp)
+                                    slavedev_notify_resp = self.device.db.slavenotify_req(self.device, desc, loc, ant, slave_spectra)
+                                    if isinstance(slavedev_notify_resp, NotifyResponse):
+                                        slavedev.channel_id = self.channel_id
+                                        self.monitor.ubus_devicechannel(slavedev.serial, slavedev.channel_id, slavedev.pawsnew)
+                                        write_log(slavedev_notify_resp)
                                     else:
                                         write_log("Slave USENOTIFY Instance Failed")
                                 else:
