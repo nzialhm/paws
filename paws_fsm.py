@@ -23,6 +23,7 @@ class PawsFSM(object):
         self.slavedevices = None
         self.next_state = "NONE"
         self.monitor = DeviceMonitor()
+        self.bis_expired = False
 
     def run(self):
         while True:
@@ -256,6 +257,44 @@ class PawsFSM(object):
             # -----------------
             elif self.state == "SLAVEPAWS":
                 write_log("STATE: SLAVEPAWS")
+                # self.monitor.slave_fetch()
+                slavedevices = self.monitor.get_slavedevice() or {}
+                for serial, slavedev in slavedevices.items():
+                    write_log("DEVICE: %s" % str(serial))
+                    try:
+                        desc, loc, ant = slavedev.to_req_models()
+                        write_log("STATE: SLAVE AVAILABLE")
+                        slavedev_available_resp = self.device.db.slaveavail_req(self.device, desc, loc, ant)
+                        if isinstance(slavedev_available_resp, AvailableSpectrumResponse):
+                            write_log(slavedev_available_resp)
+                            size = len(slavedev_available_resp.profiles)
+                            if size > 0 and (self.channel_id >= 14 and self.channel_id <= 51):
+                                slave_channel = slavedev_available_resp.get_Channel(self.channel_id)
+                                if slave_channel != None:
+                                    slave_spectra = spectra()
+                                    slave_spectra.set_channelinfo(slave_channel)
+                                    write_log("STATE: SLAVE USENOTIFY")
+                                    slavedev_notify_resp = self.device.db.slavenotify_req(self.device, desc, loc, ant, slave_spectra)
+                                    if isinstance(slavedev_notify_resp, NotifyResponse):
+                                        slavedev.channel_id = self.channel_id
+                                        self.monitor.ubus_devicechannel(slavedev.serial, slavedev.channel_id, slavedev.pawsnew)
+                                        write_log(slavedev_notify_resp)
+                                    else:
+                                        write_log("Slave USENOTIFY Instance Failed")
+                                else:
+                                    write_log("Slave Find Channel Class Failed : master channel id %s " % (str(self.channel_id)))
+                            else:
+                                write_log("Slave AVAILABLESPECTRUM Instance Failed")
+                    except Exception as e:
+                        write_log("Slave Device processing error: %s" % str(e))
+                
+                self.state = "OPERATE"
+
+            # -----------------
+            # SLAVEPAWSALL AVAILABLE + USENOTIFY
+            # -----------------
+            elif self.state == "SLAVEPAWSALL":
+                write_log("STATE: SLAVEPAWSALL")
                 self.monitor.slave_fetch()
                 slavedevices = self.monitor.get_slavedevice() or {}
                 for serial, slavedev in slavedevices.items():
@@ -304,10 +343,20 @@ class PawsFSM(object):
             "%Y-%m-%d %H:%M:%S"
         )
 
-        now = datetime.utcnow()
-        remaining = (expire - now).total_seconds()
+        # ✅ 로컬 시간 기준으로 통일 (utcnow ❌)
+        now = datetime.now()
 
-        # 로그 출력 (초 단위)
-        write_log("[DEBUG] expire remaining: {:.2f} seconds".format(remaining))
+        # datetime → epoch (로컬 기준)
+        now_ts = time.mktime(now.timetuple())
+        expire_ts = time.mktime(expire.timetuple())
 
-        return now >= expire
+        remaining = expire_ts - now_ts
+
+        write_log("[DEBUG] now=%s(%d), expire=%s(%d), remaining=%d sec" % (
+            now.strftime("%Y-%m-%d %H:%M:%S"), now_ts,
+            expire.strftime("%Y-%m-%d %H:%M:%S"), expire_ts,
+            remaining
+        ))
+
+        self.bis_expired = now_ts >= expire_ts
+        return self.bis_expired
